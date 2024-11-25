@@ -17,12 +17,12 @@ def time_to_hours(time_str):
     except ValueError:
         return 0
 
-# Formatar horas decimais em h%m%s%
+# Formatar horas decimais no formato 6680:02:58
 def format_hours_to_hms(decimal_hours):
     h = int(decimal_hours)
     m = int((decimal_hours - h) * 60)
     s = int(((decimal_hours - h) * 60 - m) * 60)
-    return f"{h}h {m}m {s}s"
+    return f"{h:02}:{m:02}:{s:02}"
 
 df['Horas Decimais'] = df['Tempo em atendimento'].apply(time_to_hours)
 
@@ -36,12 +36,11 @@ tecnico = st.selectbox(
     format_func=lambda x: "Selecione um técnico" if x == "" else x  # Placeholder para a opção em branco
 )
 
-# Filtro de tipo de atendimento
-tipos = st.multiselect(
+# Filtro de tipo de atendimento com placeholder em português
+tipos = st.selectbox(
     "Filtrar por Tipo:",
-    options=df['Tipo'].dropna().unique(),
-    default=[],  # Deixar vazio por padrão
-    help="Escolha uma ou mais opções"
+    options=["Escolha uma opção"] + list(df['Tipo'].dropna().unique()),
+    index=0  # Placeholder "Escolha uma opção" como padrão
 )
 
 # Determinar a data inicial e final padrão com base na base de dados
@@ -76,8 +75,8 @@ if start_date and end_date and start_date > end_date:
 elif tecnico:  # Só filtrar se o técnico foi selecionado
     # Filtragem de dados
     filtered_df = df[df['Atribuído - Técnico'] == tecnico]
-    if tipos:
-        filtered_df = filtered_df[filtered_df['Tipo'].isin(tipos)]
+    if tipos != "Escolha uma opção":  # Ignorar o placeholder
+        filtered_df = filtered_df[filtered_df['Tipo'] == tipos]
     if start_date:
         filtered_df = filtered_df[filtered_df['Data de abertura'] >= pd.to_datetime(start_date)]
     if end_date:
@@ -87,10 +86,10 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     total_time = filtered_df['Horas Decimais'].sum()
     formatted_time = format_hours_to_hms(total_time)
 
-    # Exibir o total de tempo em atendimento com formato h%m%s%
+    # Exibir o total de tempo em atendimento com destaque em negrito
     st.markdown(
         f"<div style='background-color: #f0f0f0; padding: 10px; border-radius: 5px; text-align: center;'>"
-        f"{formatted_time}</div>",
+        f"<strong>{formatted_time}</strong></div>",
         unsafe_allow_html=True
     )
 
