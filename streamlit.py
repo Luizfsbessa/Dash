@@ -60,9 +60,6 @@ end_date = st.date_input(
     max_value=max_date   # Limite superior
 )
 
-# Mostrar as datas no formato DD/MM/AAAA
-st.write(f"**Data selecionada:** {start_date.strftime('%d/%m/%Y')} até {end_date.strftime('%d/%m/%Y')}")
-
 # Validar se as datas foram preenchidas corretamente
 if start_date and end_date and start_date > end_date:
     st.error("A data de início não pode ser maior que a data de fim.")
@@ -79,10 +76,11 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     # Calcular o total de horas
     total_time = filtered_df['Horas Decimais'].sum()
 
-    # Dropdown para o total de tempo em atendimento
-    st.selectbox(
-        "Total de Tempo em Atendimento:",
-        options=[f"{total_time:.2f} horas"],
+    # Exibir o total de tempo em atendimento em uma caixa cinza
+    st.markdown(
+        f"<div style='background-color: #f0f0f0; padding: 10px; border-radius: 5px; text-align: center;'>"
+        f"<strong>Total de Tempo em Atendimento:</strong> {total_time:.2f} horas</div>",
+        unsafe_allow_html=True
     )
 
     # Gráfico de histograma
