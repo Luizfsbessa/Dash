@@ -36,12 +36,34 @@ tipos = st.multiselect(
     default=[],  # Deixar vazio por padrão
 )
 
+# Determinar a data inicial e final padrão com base na base de dados
+min_date = df['Data de abertura'].min()
+if pd.notnull(min_date):
+    default_start_date = min_date.replace(day=1)  # Primeiro dia do mês mais antigo
+else:
+    default_start_date = None
+
+max_date = df['Data de abertura'].max()
+
 # Filtro de intervalo de datas
 st.write("Selecionar Intervalo de Datas:")
-start_date = st.date_input("Data de Início", value=None)
-end_date = st.date_input("Data de Fim", value=None)
+start_date = st.date_input(
+    "Data de Início", 
+    value=default_start_date,  # Data padrão
+    min_value=min_date,  # Limite inferior
+    max_value=max_date   # Limite superior
+)
+end_date = st.date_input(
+    "Data de Fim", 
+    value=max_date,  # Última data disponível
+    min_value=min_date,  # Limite inferior
+    max_value=max_date   # Limite superior
+)
 
-# Validar se as datas foram preenchidas e a de início é menor que a de fim
+# Mostrar as datas no formato DD/MM/AAAA
+st.write(f"**Data selecionada:** {start_date.strftime('%d/%m/%Y')} até {end_date.strftime('%d/%m/%Y')}")
+
+# Validar se as datas foram preenchidas corretamente
 if start_date and end_date and start_date > end_date:
     st.error("A data de início não pode ser maior que a data de fim.")
 elif tecnico:  # Só filtrar se o técnico foi selecionado
@@ -74,5 +96,3 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     st.plotly_chart(fig)
 else:
     st.info("Selecione um técnico para exibir os dados.")
-
-
