@@ -36,13 +36,6 @@ tecnico = st.selectbox(
     format_func=lambda x: "Selecione um técnico" if x == "" else x  # Placeholder para a opção em branco
 )
 
-# Filtro de tipo de atendimento com placeholder em português
-tipos = st.selectbox(
-    "Filtrar por Tipo:",
-    options=["Escolha uma opção"] + list(df['Tipo'].dropna().unique()),
-    index=0  # Placeholder "Escolha uma opção" como padrão
-)
-
 # Determinar a data inicial e final padrão com base na base de dados
 min_date = df['Data de abertura'].min()
 if pd.notnull(min_date):
@@ -75,21 +68,31 @@ if start_date and end_date and start_date > end_date:
 elif tecnico:  # Só filtrar se o técnico foi selecionado
     # Filtragem de dados
     filtered_df = df[df['Atribuído - Técnico'] == tecnico]
-    if tipos != "Escolha uma opção":  # Ignorar o placeholder
-        filtered_df = filtered_df[filtered_df['Tipo'] == tipos]
     if start_date:
         filtered_df = filtered_df[filtered_df['Data de abertura'] >= pd.to_datetime(start_date)]
     if end_date:
         filtered_df = filtered_df[filtered_df['Data de abertura'] <= pd.to_datetime(end_date)]
 
-    # Calcular o total de horas
-    total_time = filtered_df['Horas Decimais'].sum()
-    formatted_time = format_hours_to_hms(total_time)
+    # Calcular o total de horas por tipo
+    incidentes_df = filtered_df[filtered_df['Tipo'] == 'Incidente']
+    requisicoes_df = filtered_df[filtered_df['Tipo'] == 'Requisição']
 
-    # Exibir o total de tempo em atendimento com destaque em negrito
+    total_incidentes = incidentes_df['Horas Decimais'].sum()
+    total_requisicoes = requisicoes_df['Horas Decimais'].sum()
+
+    formatted_incidentes = format_hours_to_hms(total_incidentes)
+    formatted_requisicoes = format_hours_to_hms(total_requisicoes)
+
+    # Exibir os tempos em atendimento
     st.markdown(
-        f"<div style='background-color: #f0f0f0; padding: 10px; border-radius: 5px; text-align: center;'>"
-        f"<strong>{formatted_time}</strong></div>",
+        f"""
+        <div style='background-color: #f0f0f0; padding: 10px; border-radius: 5px; text-align: center;'>
+            <strong>Tempo total em Incidentes:</strong> {formatted_incidentes}
+        </div>
+        <div style='background-color: #f0f0f0; padding: 10px; border-radius: 5px; text-align: center; margin-top: 10px;'>
+            <strong>Tempo total em Requisições:</strong> {formatted_requisicoes}
+        </div>
+        """,
         unsafe_allow_html=True
     )
 
@@ -104,3 +107,4 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     st.plotly_chart(fig)
 else:
     st.info("Selecione um técnico para exibir os dados.")
+
