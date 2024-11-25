@@ -17,6 +17,13 @@ def time_to_hours(time_str):
     except ValueError:
         return 0
 
+# Formatar horas decimais em h%m%s%
+def format_hours_to_hms(decimal_hours):
+    h = int(decimal_hours)
+    m = int((decimal_hours - h) * 60)
+    s = int(((decimal_hours - h) * 60 - m) * 60)
+    return f"{h}h {m}m {s}s"
+
 df['Horas Decimais'] = df['Tempo em atendimento'].apply(time_to_hours)
 
 # Título do app
@@ -34,6 +41,7 @@ tipos = st.multiselect(
     "Filtrar por Tipo:",
     options=df['Tipo'].dropna().unique(),
     default=[],  # Deixar vazio por padrão
+    help="Escolha uma ou mais opções"
 )
 
 # Determinar a data inicial e final padrão com base na base de dados
@@ -51,13 +59,15 @@ start_date = st.date_input(
     "Data de Início", 
     value=default_start_date,  # Data padrão
     min_value=min_date,  # Limite inferior
-    max_value=max_date   # Limite superior
+    max_value=max_date,  # Limite superior
+    format="DD/MM/YYYY"
 )
 end_date = st.date_input(
     "Data de Fim", 
     value=max_date,  # Última data disponível
     min_value=min_date,  # Limite inferior
-    max_value=max_date   # Limite superior
+    max_value=max_date,  # Limite superior
+    format="DD/MM/YYYY"
 )
 
 # Validar se as datas foram preenchidas corretamente
@@ -75,11 +85,12 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
 
     # Calcular o total de horas
     total_time = filtered_df['Horas Decimais'].sum()
+    formatted_time = format_hours_to_hms(total_time)
 
-    # Exibir o total de tempo em atendimento em uma caixa cinza
+    # Exibir o total de tempo em atendimento com formato h%m%s%
     st.markdown(
         f"<div style='background-color: #f0f0f0; padding: 10px; border-radius: 5px; text-align: center;'>"
-        f"<strong>Total de Tempo em Atendimento:</strong> {total_time:.2f} horas</div>",
+        f"{formatted_time}</div>",
         unsafe_allow_html=True
     )
 
