@@ -23,32 +23,45 @@ df['Horas Decimais'] = df['Tempo em atendimento'].apply(time_to_hours)
 st.title("Dashboard de Atendimento")
 
 # Filtro de técnico
-tecnico = st.selectbox("Selecionar Técnico:", sorted(df['Atribuído - Técnico'].dropna().unique()))
+tecnico = st.selectbox(
+    "Selecionar Técnico:",
+    options=[""] + sorted(df['Atribuído - Técnico'].dropna().unique()),  # Adicionar opção em branco
+    format_func=lambda x: "Selecione um técnico" if x == "" else x  # Placeholder para a opção em branco
+)
 
 # Filtro de tipo de atendimento
-tipos = st.multiselect("Filtrar por Tipo:", df['Tipo'].dropna().unique())
+tipos = st.multiselect(
+    "Filtrar por Tipo:",
+    options=df['Tipo'].dropna().unique(),
+    default=[],  # Deixar vazio por padrão
+)
 
 # Filtro de intervalo de datas
 st.write("Selecionar Intervalo de Datas:")
-start_date = st.date_input("Data de Início", value=df['Data de abertura'].min().date())
-end_date = st.date_input("Data de Fim", value=df['Data de abertura'].max().date())
+start_date = st.date_input("Data de Início", value=None)
+end_date = st.date_input("Data de Fim", value=None)
 
-# Validar se a data de início é menor ou igual à data de fim
-if start_date > end_date:
+# Validar se as datas foram preenchidas e a de início é menor que a de fim
+if start_date and end_date and start_date > end_date:
     st.error("A data de início não pode ser maior que a data de fim.")
-else:
+elif tecnico:  # Só filtrar se o técnico foi selecionado
     # Filtragem de dados
     filtered_df = df[df['Atribuído - Técnico'] == tecnico]
     if tipos:
         filtered_df = filtered_df[filtered_df['Tipo'].isin(tipos)]
-    filtered_df = filtered_df[
-        (filtered_df['Data de abertura'] >= pd.to_datetime(start_date)) &
-        (filtered_df['Data de abertura'] <= pd.to_datetime(end_date))
-    ]
+    if start_date:
+        filtered_df = filtered_df[filtered_df['Data de abertura'] >= pd.to_datetime(start_date)]
+    if end_date:
+        filtered_df = filtered_df[filtered_df['Data de abertura'] <= pd.to_datetime(end_date)]
 
-    # Exibir métricas
+    # Calcular o total de horas
     total_time = filtered_df['Horas Decimais'].sum()
-    st.write(f"Total de Tempo em Atendimento: {total_time:.2f} horas")
+
+    # Dropdown para o total de tempo em atendimento
+    st.selectbox(
+        "Total de Tempo em Atendimento:",
+        options=[f"{total_time:.2f} horas"],
+    )
 
     # Gráfico de histograma
     fig = px.histogram(
@@ -59,4 +72,7 @@ else:
         labels={'Tipo': 'Tipo de Atendimento'}
     )
     st.plotly_chart(fig)
+else:
+    st.info("Selecione um técnico para exibir os dados.")
+
 
