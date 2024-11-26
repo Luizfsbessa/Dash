@@ -103,21 +103,26 @@ total_requisicoes = 0
 # Validar se as datas foram preenchidas corretamente
 if start_date and end_date and start_date > end_date:
     st.error("A data de início não pode ser maior que a data de fim.")
-elif tecnico:  # Só filtrar e calcular se um técnico foi selecionado
-    # Filtragem de dados
-    filtered_df = df[df['Atribuído - Técnico'] == tecnico]
-    if start_date:
-        filtered_df = filtered_df[filtered_df['Data de abertura'] >= pd.to_datetime(start_date)]
-    if end_date:
-        filtered_df = filtered_df[filtered_df['Data de abertura'] <= pd.to_datetime(end_date)]
+else:
+    # Inicializar as variáveis incidentes_df e requisicoes_df como dataframes vazios
+    incidentes_df = pd.DataFrame()
+    requisicoes_df = pd.DataFrame()
 
-    # Calcular o total de horas por tipo, apenas se o dataframe não estiver vazio
-    if not filtered_df.empty:
+    if tecnico:  # Só filtrar e calcular se um técnico foi selecionado
+        # Filtragem de dados
+        filtered_df = df[df['Atribuído - Técnico'] == tecnico]
+        if start_date:
+            filtered_df = filtered_df[filtered_df['Data de abertura'] >= pd.to_datetime(start_date)]
+        if end_date:
+            filtered_df = filtered_df[filtered_df['Data de abertura'] <= pd.to_datetime(end_date)]
+
+        # Verificar se há incidentes e requisições
         incidentes_df = filtered_df[filtered_df['Tipo'] == 'Incidente']
         requisicoes_df = filtered_df[filtered_df['Tipo'] == 'Requisição']
 
-        total_incidentes = incidentes_df['Horas Decimais'].sum()
-        total_requisicoes = requisicoes_df['Horas Decimais'].sum()
+        # Calcular o total de horas por tipo, apenas se os dataframes não estiverem vazios
+        total_incidentes = incidentes_df['Horas Decimais'].sum() if not incidentes_df.empty else 0
+        total_requisicoes = requisicoes_df['Horas Decimais'].sum() if not requisicoes_df.empty else 0
 
 # Formatar os totais
 formatted_incidentes = format_hours_to_hms(total_incidentes)
@@ -188,51 +193,3 @@ if not requisicoes_df.empty:
         showticklabels=False # Remove os rótulos dos valores no eixo Y
     )
     st.plotly_chart(fig_requisicoes)
-
-# Gráfico de Pizza para "Prioridade" - Segregado por Tipo (Incidente e Requisição)
-# Criar duas colunas para exibir os gráficos lado a lado
-col1, col2 = st.columns(2)
-
-with col1:
-    if not incidentes_df.empty and 'Prioridade' in incidentes_df.columns:
-        prioridade_incidentes = incidentes_df['Prioridade'].value_counts().reset_index()
-        prioridade_incidentes.columns = ['Prioridade', 'Quantidade']
-
-        fig_pizza_incidentes = px.pie(
-            prioridade_incidentes,
-            names='Prioridade',
-            values='Quantidade',
-            title="Distribuição de Prioridades - Incidentes",
-            color_discrete_sequence=px.colors.sequential.Teal,
-        )
-        fig_pizza_incidentes.update_traces(textinfo='percent+label')  # Mostrar % e label
-        fig_pizza_incidentes.update_layout(
-            showlegend=True,
-            legend_title_text="Prioridade",
-            plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
-            paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
-            font=dict(color="black"),  # Cor do texto
-        )
-        st.plotly_chart(fig_pizza_incidentes)
-
-with col2:
-    if not requisicoes_df.empty and 'Prioridade' in requisicoes_df.columns:
-        prioridade_requisicoes = requisicoes_df['Prioridade'].value_counts().reset_index()
-        prioridade_requisicoes.columns = ['Prioridade', 'Quantidade']
-
-        fig_pizza_requisicoes = px.pie(
-            prioridade_requisicoes,
-            names='Prioridade',
-            values='Quantidade',
-            title="Distribuição de Prioridades - Requisições",
-            color_discrete_sequence=px.colors.sequential.Teal,
-        )
-        fig_pizza_requisicoes.update_traces(textinfo='percent+label')  # Mostrar % e label
-        fig_pizza_requisicoes.update_layout(
-            showlegend=True,
-            legend_title_text="Prioridade",
-            plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
-            paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
-            font=dict(color="black"),  # Cor do texto
-        )
-        st.plotly_chart(fig_pizza_requisicoes)
