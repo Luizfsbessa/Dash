@@ -275,55 +275,58 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
 
 
 
-# Gráficos de Pizza - Distribuição de Incidentes e Requisições por Prioridade
+# Verificar se as variáveis estão definidas e são DataFrames
+if isinstance(incidentes_df, pd.DataFrame) and isinstance(requisicoes_df, pd.DataFrame):
+    # Verificar se os DataFrames de incidentes e requisições contêm dados
+    if not incidentes_df.empty and not requisicoes_df.empty:
+        incidentes_por_prioridade = incidentes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
+        requisicoes_por_prioridade = requisicoes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
 
-# Verificar se os DataFrames de incidentes e requisições contêm dados
-if not incidentes_df.empty and not requisicoes_df.empty:
-    incidentes_por_prioridade = incidentes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
-    requisicoes_por_prioridade = requisicoes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
+        # Definir cores personalizadas para cada prioridade
+        prioridade_cores = {
+            'Baixa': '#90ACB8',
+            'Média': '#587D8E',
+            'Alta': '#C1D8E3',
+            'Muito Alta': '#2D55263'
+        }
 
-    # Definir cores personalizadas para cada prioridade
-    prioridade_cores = {
-        'Baixa': '#90ACB8',
-        'Média': '#587D8E',
-        'Alta': '#C1D8E3',
-        'Muito Alta': '#2D55263'
-    }
+        # Gráfico de pizza para incidentes
+        if not incidentes_por_prioridade.empty:
+            fig_incidentes_pizza = px.pie(
+                incidentes_por_prioridade,
+                names='Prioridade',
+                values='Número de Atendimentos',
+                title="Distribuição de Incidentes por Prioridade",
+                color='Prioridade',
+                color_discrete_map=prioridade_cores
+            )
+            # Atualizar rótulo para exibir apenas o quantitativo em negrito
+            fig_incidentes_pizza.update_traces(
+                texttemplate='<b>%{value}</b>',  # Exibe o valor de atendimentos em negrito
+                textinfo='value'  # Exibe apenas o quantitativo
+            )
+            st.plotly_chart(fig_incidentes_pizza)
 
-    # Gráfico de pizza para incidentes
-    if not incidentes_por_prioridade.empty:
-        fig_incidentes_pizza = px.pie(
-            incidentes_por_prioridade,
-            names='Prioridade',
-            values='Número de Atendimentos',
-            title="Distribuição de Incidentes por Prioridade",
-            color='Prioridade',
-            color_discrete_map=prioridade_cores
-        )
-        # Atualizar rótulo para exibir apenas o quantitativo em negrito
-        fig_incidentes_pizza.update_traces(
-            texttemplate='<b>%{value}</b>',  # Exibe o valor de atendimentos em negrito
-            textinfo='value'  # Exibe apenas o quantitativo
-        )
-        st.plotly_chart(fig_incidentes_pizza)
+        # Gráfico de pizza para requisições
+        if not requisicoes_por_prioridade.empty:
+            fig_requisicoes_pizza = px.pie(
+                requisicoes_por_prioridade,
+                names='Prioridade',
+                values='Número de Atendimentos',
+                title="Distribuição de Requisições por Prioridade",
+                color='Prioridade',
+                color_discrete_map=prioridade_cores
+            )
+            # Atualizar rótulo para exibir apenas o quantitativo em negrito
+            fig_requisicoes_pizza.update_traces(
+                texttemplate='<b>%{value}</b>',  # Exibe o valor de atendimentos em negrito
+                textinfo='value'  # Exibe apenas o quantitativo
+            )
+            st.plotly_chart(fig_requisicoes_pizza)
 
-    # Gráfico de pizza para requisições
-    if not requisicoes_por_prioridade.empty:
-        fig_requisicoes_pizza = px.pie(
-            requisicoes_por_prioridade,
-            names='Prioridade',
-            values='Número de Atendimentos',
-            title="Distribuição de Requisições por Prioridade",
-            color='Prioridade',
-            color_discrete_map=prioridade_cores
-        )
-        # Atualizar rótulo para exibir apenas o quantitativo em negrito
-        fig_requisicoes_pizza.update_traces(
-            texttemplate='<b>%{value}</b>',  # Exibe o valor de atendimentos em negrito
-            textinfo='value'  # Exibe apenas o quantitativo
-        )
-        st.plotly_chart(fig_requisicoes_pizza)
-
+    else:
+        st.warning("Não há dados suficientes para exibir os gráficos. Verifique se o técnico foi selecionado corretamente.")
 else:
-    st.warning("Não há dados suficientes para exibir os gráficos. Verifique se o técnico foi selecionado corretamente.")
+    st.error("Erro: As variáveis 'incidentes_df' ou 'requisicoes_df' não estão definidas ou não são DataFrames.")
+
 
