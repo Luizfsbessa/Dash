@@ -29,7 +29,7 @@ def time_to_hours(time_str):
     except ValueError:
         return 0
 
-# Formatar horas decimais no formato HH:MM:SS
+# Formatar horas decimais no formato 6680:02:58
 def format_hours_to_hms(decimal_hours):
     h = int(decimal_hours)
     m = int((decimal_hours - h) * 60)
@@ -40,6 +40,30 @@ df['Horas Decimais'] = df['Tempo em atendimento'].apply(time_to_hours)
 
 # Título do app
 st.title("Dashboard de Atendimento")
+
+# Estilizando o fundo e a cor do texto das caixas de seleção e data
+custom_style = """
+    <style>
+        .stSelectbox, .stDateInput, .stMultiselect, .stCheckbox, .stTextInput, .stTextArea {
+            background-color: white;
+            color: black;
+            padding: 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #A1C6D8;
+        }
+        .stSelectbox select, .stDateInput input {
+            background-color: white;
+            color: black;
+            border: 1px solid #A1C6D8;
+        }
+        .stSelectbox, .stDateInput {
+            font-size: 16px;
+        }
+    </style>
+"""
+st.markdown(custom_style, unsafe_allow_html=True)
 
 # Filtro de técnico
 tecnico = st.selectbox(
@@ -80,48 +104,135 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     if end_date:
         filtered_df = filtered_df[filtered_df['Data de abertura'] <= pd.to_datetime(end_date)]
 
-    # Filtrar somente os incidentes
+    # Calcular o total de horas por tipo
     incidentes_df = filtered_df[filtered_df['Tipo'] == 'Incidente']
+    requisicoes_df = filtered_df[filtered_df['Tipo'] == 'Requisição']
 
-    # Exibir o total de incidentes
-    total_incidentes = incidentes_df.shape[0]
-    st.markdown(f"### Total de Incidentes: {total_incidentes}")
+    total_incidentes = incidentes_df['Horas Decimais'].sum()
+    total_requisicoes = requisicoes_df['Horas Decimais'].sum()
 
-    # Detalhar Prioridade
-    if not incidentes_df.empty and 'Prioridade' in incidentes_df.columns:
-        # Distribuição por Prioridade
-        prioridade_distribuicao = incidentes_df['Prioridade'].value_counts().reset_index()
-        prioridade_distribuicao.columns = ['Prioridade', 'Quantidade']
+    formatted_incidentes = format_hours_to_hms(total_incidentes)
+    formatted_requisicoes = format_hours_to_hms(total_requisicoes)
 
-        # Gráfico de Pizza
-        fig_pizza_incidentes = px.pie(
-            prioridade_distribuicao,
-            names='Prioridade',
-            values='Quantidade',
-            title="Distribuição de Prioridades - Incidentes",
-            color_discrete_sequence=px.colors.sequential.Teal,
+    # Exibir os tempos em atendimento com fundo cinza e texto em preto
+    if total_incidentes > 0:
+        st.markdown(
+            f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>"
+            f"<b>Tempo total em Incidentes:</b> {formatted_incidentes}</div>",
+            unsafe_allow_html=True
         )
-        fig_pizza_incidentes.update_traces(textinfo='percent+label')
-        st.plotly_chart(fig_pizza_incidentes)
 
-        # Checkbox para métricas adicionais
-        if st.checkbox("Exibir métricas detalhadas por Prioridade"):
-            # Cálculo de média e tempo máximo
-            prioridade_metrica = (
-                incidentes_df.groupby('Prioridade')['Horas Decimais']
-                .agg(['mean', 'max'])
-                .reset_index()
+    if total_requisicoes > 0:
+        st.markdown(
+            f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>"
+            f"<b>Tempo total em Requisições:</b> {formatted_requisicoes}</div>",
+            unsafe_allow_html=True
+        )
+
+    # Gráficos de número de atendimentos por mês, separados por Tipo (Requisição e Incidente)
+    incidentes_por_mes = incidentes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
+    requisicoes_por_mes = requisicoes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
+
+    # Verificar se os DataFrames não estão vazios e exibir os gráficos
+    if not incidentes_por_mes.empty:
+        fig_incidentes = px.bar(
+            incidentes_por_mes,
+            x='Mês/Ano',
+            y='Número de Atendimentos',
+            text='Número de Atendimentos',
+            title="Número de Atendimentos por Mês - Incidentes",
+        )
+        fig_incidentes.update_traces(texttemplate='<b>%{text}</b>', textposition='outside')
+        fig_incidentes.update_layout(
+            xaxis_title=None,
+            yaxis_title=None,
+            showlegend=False,
+            plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+            paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+            font=dict(color="black"),  # Cor do texto do gráfico
+        )
+        fig_incidentes.update_xaxes(showgrid=False)
+        fig_incidentes.update_yaxes(
+            showgrid=False,      # Opcional: remove a grade do eixo Y
+            showticklabels=False # Remove os rótulos dos valores no eixo Y
+        )
+        st.plotly_chart(fig_incidentes)
+
+    if not requisicoes_por_mes.empty:
+        fig_requisicoes = px.bar(
+            requisicoes_por_mes,
+            x='Mês/Ano',
+            y='Número de Atendimentos',
+            text='Número de Atendimentos',
+            title="Número de Atendimentos por Mês - Requisições",
+        )
+        fig_requisicoes.update_traces(texttemplate='<b>%{text}</b>', textposition='outside')
+        fig_requisicoes.update_layout(
+            xaxis_title=None,
+            yaxis_title=None,
+            showlegend=False,
+            plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+            paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+            font=dict(color="black"),  # Cor do texto do gráfico
+        )
+        fig_requisicoes.update_xaxes(showgrid=False)
+        fig_requisicoes.update_yaxes(
+            showgrid=False,      # Opcional: remove a grade do eixo Y
+            showticklabels=False # Remove os rótulos dos valores no eixo Y
+        )
+        st.plotly_chart(fig_requisicoes)
+
+    # Gráfico de Pizza para "Prioridade" - Segregado por Tipo (Incidente e Requisição)
+    # Criar duas colunas para exibir os gráficos lado a lado
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if not incidentes_df.empty and 'Prioridade' in incidentes_df.columns:
+            prioridade_incidentes = incidentes_df['Prioridade'].value_counts().reset_index()
+            prioridade_incidentes.columns = ['Prioridade', 'Quantidade']
+
+            fig_pizza_incidentes = px.pie(
+                prioridade_incidentes,
+                names='Prioridade',
+                values='Quantidade',
+                title="Distribuição de Prioridades - Incidentes",
+                color_discrete_sequence=px.colors.sequential.Teal,
             )
-            prioridade_metrica.columns = ['Prioridade', 'Média (Horas)', 'Máximo (Horas)']
+            fig_pizza_incidentes.update_traces(textinfo='percent+label')  # Mostrar porcentagem e rótulos no gráfico
+            fig_pizza_incidentes.update_layout(
+                showlegend=True, 
+                legend_title_text="Prioridade",
+                font=dict(color="black"),  # Cor do texto
+                plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+                paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+            )
+            st.plotly_chart(fig_pizza_incidentes)
+        else:
+            st.warning("Não há dados de Prioridade para Incidentes.")
 
-            # Formatar para exibir as métricas
-            prioridade_metrica['Média (Horas)'] = prioridade_metrica['Média (Horas)'].apply(format_hours_to_hms)
-            prioridade_metrica['Máximo (Horas)'] = prioridade_metrica['Máximo (Horas)'].apply(format_hours_to_hms)
+    with col2:
+        if not requisicoes_df.empty and 'Prioridade' in requisicoes_df.columns:
+            prioridade_requisicoes = requisicoes_df['Prioridade'].value_counts().reset_index()
+            prioridade_requisicoes.columns = ['Prioridade', 'Quantidade']
 
-            # Exibir tabela
-            st.markdown("### Métricas de Tempo por Prioridade")
-            st.dataframe(prioridade_metrica, use_container_width=True)
-    else:
-        st.warning("Não há dados de prioridade para os incidentes.")
+            fig_pizza_requisicoes = px.pie(
+                prioridade_requisicoes,
+                names='Prioridade',
+                values='Quantidade',
+                title="Distribuição de Prioridades - Requisições",
+                color_discrete_sequence=px.colors.sequential.Teal,
+            )
+            fig_pizza_requisicoes.update_traces(textinfo='percent+label')  # Mostrar porcentagem e rótulos no gráfico
+            fig_pizza_requisicoes.update_layout(
+                showlegend=True, 
+                legend_title_text="Prioridade",
+                font=dict(color="black"),  # Cor do texto
+                plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+                paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+            )
+            st.plotly_chart(fig_pizza_requisicoes)
+        else:
+            st.warning("Não há dados de Prioridade para Requisições.")
+
 else:
     st.info("Selecione um técnico para exibir os dados.")
