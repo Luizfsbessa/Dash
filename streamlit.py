@@ -114,20 +114,54 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     formatted_incidentes = format_hours_to_hms(total_incidentes)
     formatted_requisicoes = format_hours_to_hms(total_requisicoes)
 
-    # Exibir os tempos em atendimento com fundo cinza e texto em preto
-    if total_incidentes > 0:
-        st.markdown(
-            f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>"
-            f"<b>Tempo total em Incidentes:</b> {formatted_incidentes}</div>",
-            unsafe_allow_html=True
-        )
+   # Exibir os tempos em atendimento com informações detalhadas de prioridade
+if total_incidentes > 0:
+    # Cálculo de tempos médios por prioridade em Incidentes
+    tempos_incidentes = incidentes_df.groupby('Prioridade')['Horas Decimais'].agg(['mean', 'max']).reset_index()
+    tempos_incidentes['Média'] = tempos_incidentes['mean'].apply(format_hours_to_hms)
+    tempos_incidentes['Máximo'] = tempos_incidentes['max'].apply(format_hours_to_hms)
 
-    if total_requisicoes > 0:
-        st.markdown(
-            f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>"
-            f"<b>Tempo total em Requisições:</b> {formatted_requisicoes}</div>",
-            unsafe_allow_html=True
-        )
+    # Gerar o texto com os detalhes
+    incidentes_detalhes = "".join([
+        f"<li><b>{row['Prioridade']}:</b> Média: {row['Média']} | Máximo: {row['Máximo']}</li>"
+        for _, row in tempos_incidentes.iterrows()
+    ])
+
+    st.markdown(
+        f"""
+        <div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>
+            <b>Tempo total em Incidentes:</b> {formatted_incidentes}
+            <ul>
+                {incidentes_detalhes}
+            </ul>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+if total_requisicoes > 0:
+    # Cálculo de tempos médios por prioridade em Requisições
+    tempos_requisicoes = requisicoes_df.groupby('Prioridade')['Horas Decimais'].agg(['mean', 'max']).reset_index()
+    tempos_requisicoes['Média'] = tempos_requisicoes['mean'].apply(format_hours_to_hms)
+    tempos_requisicoes['Máximo'] = tempos_requisicoes['max'].apply(format_hours_to_hms)
+
+    # Gerar o texto com os detalhes
+    requisicoes_detalhes = "".join([
+        f"<li><b>{row['Prioridade']}:</b> Média: {row['Média']} | Máximo: {row['Máximo']}</li>"
+        for _, row in tempos_requisicoes.iterrows()
+    ])
+
+    st.markdown(
+        f"""
+        <div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>
+            <b>Tempo total em Requisições:</b> {formatted_requisicoes}
+            <ul>
+                {requisicoes_detalhes}
+            </ul>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     # Gráficos de número de atendimentos por mês, separados por Tipo (Requisição e Incidente)
     incidentes_por_mes = incidentes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
