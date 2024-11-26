@@ -157,11 +157,11 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             unsafe_allow_html=True
         )
 
-    # Gráficos de número de atendimentos por mês, separados por Tipo (Requisição e Incidente)
+       # Gráficos de número de atendimentos por mês, separados por Tipo (Requisição e Incidente)
     incidentes_por_mes = incidentes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
     requisicoes_por_mes = requisicoes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
 
-    # Verificar se os DataFrames não estão vazios e exibir os gráficos
+    # Verificar se os DataFrames não estão vazios e exibir os gráficos de barras
     if not incidentes_por_mes.empty:
         fig_incidentes = px.bar(
             incidentes_por_mes,
@@ -183,7 +183,8 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
         fig_incidentes.update_yaxes(
             showgrid=False,      # Opcional: remove a grade do eixo Y
             zeroline=False,      # Opcional: remove a linha do eixo Y
-            showline=False       # Opcional: remove a linha do gráfico
+            showline=False,      # Opcional: remove a linha do gráfico
+            showticklabels=False  # Remove os valores do eixo Y
         )
 
         st.plotly_chart(fig_incidentes)
@@ -209,10 +210,34 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
         fig_requisicoes.update_yaxes(
             showgrid=False,      # Opcional: remove a grade do eixo Y
             zeroline=False,      # Opcional: remove a linha do eixo Y
-            showline=False       # Opcional: remove a linha do gráfico
+            showline=False,      # Opcional: remove a linha do gráfico
+            showticklabels=False  # Remove os valores do eixo Y
         )
 
         st.plotly_chart(fig_requisicoes)
+
+    # Gráficos de Pizza - Distribuição de Incidentes e Requisições por Prioridade
+    incidentes_por_prioridade = incidentes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
+    requisicoes_por_prioridade = requisicoes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
+
+    # Verificar se os DataFrames não estão vazios e exibir os gráficos de pizza
+    if not incidentes_por_prioridade.empty:
+        fig_incidentes_pizza = px.pie(
+            incidentes_por_prioridade,
+            names='Prioridade',
+            values='Número de Atendimentos',
+            title="Distribuição de Incidentes por Prioridade",
+        )
+        st.plotly_chart(fig_incidentes_pizza)
+
+    if not requisicoes_por_prioridade.empty:
+        fig_requisicoes_pizza = px.pie(
+            requisicoes_por_prioridade,
+            names='Prioridade',
+            values='Número de Atendimentos',
+            title="Distribuição de Requisições por Prioridade",
+        )
+        st.plotly_chart(fig_requisicoes_pizza)
 
     # Gráfico de Pizza - Distribuição por Tipo de Atendimento (Incidente ou Requisição)
     tipo_atendimento = df.groupby('Tipo').size().reset_index(name='Número de Atendimentos')
