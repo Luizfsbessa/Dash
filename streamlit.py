@@ -74,6 +74,27 @@ tecnico = st.selectbox(
     help="Escolha o técnico para filtrar os dados",
 )
 
+# Estilo para garantir que o texto fique visível no modo escuro
+st.markdown("""
+    <style>
+    .streamlit-expanderHeader {
+        color: white !important;
+    }
+    .stTextInput, .stDateInput, .stSelectbox, .stRadio {
+        color: white !important;
+        background-color: #333333 !important;  /* Fundo escuro */
+        border: 1px solid #5e5e5e !important;  /* Cor de borda clara */
+    }
+    .stTextInput input, .stDateInput input, .stSelectbox select {
+        color: white !important;
+        background-color: #333333 !important;  /* Fundo escuro no campo */
+    }
+    .stTextInput input::placeholder {
+        color: #aaaaaa !important;  /* Cor do texto do placeholder */
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 # Filtro de intervalo de datas
 start_date = st.date_input(
     "Data de Início", 
@@ -81,8 +102,8 @@ start_date = st.date_input(
     min_value=min_date, 
     max_value=max_date, 
     format="DD/MM/YYYY",
-    key="start_date",
-    help="Escolha a data inicial para o filtar os dados",
+    key="start_date",  
+    help="Escolha a data inicial para o filtrar os dados",
 )
 
 end_date = st.date_input(
@@ -91,9 +112,10 @@ end_date = st.date_input(
     min_value=min_date, 
     max_value=max_date, 
     format="DD/MM/YYYY",
-    key="end_date",
-    help="Escolha a data final para o filtar os dados",
+    key="end_date",  
+    help="Escolha a data final para o filtrar os dados",
 )
+
 
 # Validar se as datas foram preenchidas corretamente
 if start_date and end_date and start_date > end_date:
