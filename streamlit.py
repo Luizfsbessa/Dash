@@ -104,51 +104,28 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     if end_date:
         filtered_df = filtered_df[filtered_df['Data de abertura'] <= pd.to_datetime(end_date)]
 
-    # Calcular a média, máximo e mínimo de horas por tipo
+    # Calcular o total de horas por tipo
     incidentes_df = filtered_df[filtered_df['Tipo'] == 'Incidente']
     requisicoes_df = filtered_df[filtered_df['Tipo'] == 'Requisição']
 
-    incidentes_metrics = {
-        'Média': incidentes_df['Horas Decimais'].mean(),
-        'Máximo': incidentes_df['Horas Decimais'].max(),
-        'Mínimo': incidentes_df['Horas Decimais'].min()
-    }
+    total_incidentes = incidentes_df['Horas Decimais'].sum()
+    total_requisicoes = requisicoes_df['Horas Decimais'].sum()
 
-    requisicoes_metrics = {
-        'Média': requisicoes_df['Horas Decimais'].mean(),
-        'Máximo': requisicoes_df['Horas Decimais'].max(),
-        'Mínimo': requisicoes_df['Horas Decimais'].min()
-    }
+    formatted_incidentes = format_hours_to_hms(total_incidentes)
+    formatted_requisicoes = format_hours_to_hms(total_requisicoes)
 
-    # Exibir as métricas de tempo de atendimento
-    st.markdown(
-        f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>"
-        f"<b>Média de Incidentes:</b> {format_hours_to_hms(incidentes_metrics['Média'])}</div>",
-        unsafe_allow_html=True
-    )
+    # Exibir os tempos em atendimento com fundo cinza e texto em preto
+    if total_incidentes > 0:
+        st.markdown(
+            f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>Tempo total em Incidentes: <b>{formatted_incidentes}</b></div>",
+            unsafe_allow_html=True
+        )
 
-    st.markdown(
-        f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>"
-        f"<b>Média de Requisições:</b> {format_hours_to_hms(requisicoes_metrics['Média'])}</div>",
-        unsafe_allow_html=True
-    )
-
-    # Gráfico de barras agrupadas para Média, Máximo e Mínimo
-    metrics_df = pd.DataFrame({
-        'Métrica': ['Média', 'Máximo', 'Mínimo'],
-        'Incidentes': [incidentes_metrics['Média'], incidentes_metrics['Máximo'], incidentes_metrics['Mínimo']],
-        'Requisições': [requisicoes_metrics['Média'], requisicoes_metrics['Máximo'], requisicoes_metrics['Mínimo']]
-    })
-
-    fig_metrics = px.bar(
-        metrics_df,
-        x='Métrica',
-        y=['Incidentes', 'Requisições'],
-        barmode='group',
-        title="Tempo de Atendimento por Tipo - Média, Máximo e Mínimo",
-        labels={'value': 'Tempo em Horas', 'Métrica': 'Tipo de Métrica'},
-    )
-    st.plotly_chart(fig_metrics)
+    if total_requisicoes > 0:
+        st.markdown(
+            f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>Tempo total em Requisições: <b>{formatted_requisicoes}</b></div>",
+            unsafe_allow_html=True
+        )
 
     # Gráficos de número de atendimentos por mês, separados por Tipo (Requisição e Incidente)
     incidentes_por_mes = incidentes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
@@ -168,11 +145,15 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             xaxis_title=None,
             yaxis_title=None,
             showlegend=False,
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)'
+            plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+            paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+            font=dict(color="black"),  # Cor do texto do gráfico
         )
         fig_incidentes.update_xaxes(showgrid=False)
-        fig_incidentes.update_yaxes(showgrid=False, showticklabels=False)
+        fig_incidentes.update_yaxes(
+            showgrid=False,      # Opcional: remove a grade do eixo Y
+            showticklabels=False # Remove os rótulos dos valores no eixo Y
+        )
         st.plotly_chart(fig_incidentes)
 
     if not requisicoes_por_mes.empty:
@@ -188,12 +169,15 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             xaxis_title=None,
             yaxis_title=None,
             showlegend=False,
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)'
+            plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+            paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+            font=dict(color="black"),  # Cor do texto do gráfico
         )
         fig_requisicoes.update_xaxes(showgrid=False)
-        fig_requisicoes.update_yaxes(showgrid=False, showticklabels=False)
+        fig_requisicoes.update_yaxes(
+            showgrid=False,      # Opcional: remove a grade do eixo Y
+            showticklabels=False # Remove os rótulos dos valores no eixo Y
+        )
         st.plotly_chart(fig_requisicoes)
-
 else:
     st.info("Selecione um técnico para exibir os dados.")
