@@ -36,6 +36,7 @@ def format_hours_to_hms(decimal_hours):
     s = int(((decimal_hours - h) * 60 - m) * 60)
     return f"{h:02}:{m:02}:{s:02}"
 
+# Criar a coluna 'Horas Decimais' convertendo 'Tempo em atendimento' para horas decimais
 df['Horas Decimais'] = df['Tempo em atendimento'].apply(time_to_hours)
 
 # Título do app
@@ -173,3 +174,4 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
         st.plotly_chart(fig_requisicoes)
 else:
     st.info("Selecione um técnico para exibir os dados.")
+
