@@ -9,6 +9,9 @@ df = pd.read_excel(file_path)
 # Certificar-se de que a coluna 'Data de abertura' está no formato datetime
 df['Data de abertura'] = pd.to_datetime(df['Data de abertura'], errors='coerce')
 
+# Adicionar uma coluna para o período (ano-mês)
+df['Período'] = df['Data de abertura'].dt.to_period('M')
+
 # Converter a coluna 'Tempo em atendimento' para horas decimais
 def time_to_hours(time_str):
     try:
@@ -17,7 +20,7 @@ def time_to_hours(time_str):
     except ValueError:
         return 0
 
-# Formatar horas decimais no formato 6680:02:58
+# Formatar horas decimais no formato hh:mm:ss
 def format_hours_to_hms(decimal_hours):
     h = int(decimal_hours)
     m = int((decimal_hours - h) * 60)
@@ -49,23 +52,23 @@ max_date = df['Data de abertura'].max()
 st.write("Selecionar Intervalo de Datas:")
 start_date = st.date_input(
     "Data de Início", 
-    value=default_start_date,  # Data padrão
-    min_value=min_date,  # Limite inferior
-    max_value=max_date,  # Limite superior
+    value=default_start_date, 
+    min_value=min_date,
+    max_value=max_date, 
     format="DD/MM/YYYY"
 )
 end_date = st.date_input(
     "Data de Fim", 
-    value=max_date,  # Última data disponível
-    min_value=min_date,  # Limite inferior
-    max_value=max_date,  # Limite superior
+    value=max_date, 
+    min_value=min_date, 
+    max_value=max_date, 
     format="DD/MM/YYYY"
 )
 
 # Validar se as datas foram preenchidas corretamente
 if start_date and end_date and start_date > end_date:
     st.error("A data de início não pode ser maior que a data de fim.")
-elif tecnico:  # Só filtrar se o técnico foi selecionado
+elif tecnico:
     # Filtragem de dados
     filtered_df = df[df['Atribuído - Técnico'] == tecnico]
     if start_date:
@@ -73,17 +76,18 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     if end_date:
         filtered_df = filtered_df[filtered_df['Data de abertura'] <= pd.to_datetime(end_date)]
 
-    # Calcular o total de horas por tipo
+    # Segregar por tipo
     incidentes_df = filtered_df[filtered_df['Tipo'] == 'Incidente']
     requisicoes_df = filtered_df[filtered_df['Tipo'] == 'Requisição']
 
+    # Calcular o total de atendimentos e horas
     total_incidentes = incidentes_df['Horas Decimais'].sum()
     total_requisicoes = requisicoes_df['Horas Decimais'].sum()
 
     formatted_incidentes = format_hours_to_hms(total_incidentes)
     formatted_requisicoes = format_hours_to_hms(total_requisicoes)
 
-    # Exibir os tempos em atendimento
+    # Exibir os tempos totais
     st.markdown(
         f"""
         <div style='background-color: #f0f0f0; padding: 10px; border-radius: 5px; text-align: center;'>
@@ -96,15 +100,45 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
         unsafe_allow_html=True
     )
 
-    # Gráfico de histograma
-    fig = px.histogram(
-        filtered_df,
-        x='Tipo',
-        text_auto=True,
-        title="Distribuição de Atendimentos por Tipo",
-        labels={'Tipo': 'Tipo de Atendimento'}
+    # Gráfico de número de atendimentos por mês (Requisições)
+    requisicoes_por_mes = requisicoes_df.groupby('Período').size().reset_index(name='Atendimentos')
+    fig_requisicoes = px.bar(
+        requisicoes_por_mes,
+        x='Período',
+        y='Atendimentos',
+        title="Atendimentos por Mês - Requisições",
+        labels={'Período': '', 'Atendimentos': ''},
+        template="simple_white"
     )
-    st.plotly_chart(fig)
+    fig_requisicoes.update_layout(showlegend=False, xaxis_title=None, yaxis_title=None)
+    fig_requisicoes.update_xaxes(showgrid=False)
+    fig_requisicoes.update_yaxes(showgrid=False)
+    st.plotly_chart(fig_requisicoes)
+
+    # Gráfico de número de atendimentos por mês (Incidentes)
+    incidentes_por_mes = incidentes_df.groupby('Período').size().reset_index(name='Atendimentos')
+    fig_incidentes = px.bar(
+        incidentes_por_mes,
+        x='Período',
+        y='Atendimentos',
+        title="Atendimentos por Mês - Incidentes",
+        labels={'Período': '', 'Atendimentos': ''},
+        template="simple_white"
+    )
+    fig_incidentes.update_layout(showlegend=False, xaxis_title=None, yaxis_title=None)
+    fig_incidentes.update_xaxes(showgrid=False)
+    fig_incidentes.update_yaxes(showgrid=False)
+    st.plotly_chart(fig_incidentes)
+
+    # Gráfico de pizza (Esforços por fornecedor)
+    fornecedor_counts = filtered_df['Atribuído - Atribuído a um fornecedor'].value_counts().reset_index()
+    fornecedor_counts.columns = ['Fornecedor', 'Atendimentos']
+    fig_pizza = px.pie(
+        fornecedor_counts,
+        names='Fornecedor',
+        values='Atendimentos',
+        title="Distribuição de Esforços por Fornecedor"
+    )
+    st.plotly_chart(fig_pizza)
 else:
     st.info("Selecione um técnico para exibir os dados.")
-
