@@ -29,6 +29,38 @@ def format_hours_to_hms(decimal_hours):
 
 df['Horas Decimais'] = df['Tempo em atendimento'].apply(time_to_hours)
 
+# Adicionar toggle para o modo noturno
+modo_noturno = st.checkbox("Ativar Modo Noturno", value=False)
+
+# Definir estilos com base no modo
+if modo_noturno:
+    fundo = "#000000"  # Preto
+    texto = "#FFFF00"  # Amarelo
+else:
+    fundo = "#FFFFFF"  # Branco
+    texto = "#000000"  # Preto
+
+# Estilo customizado
+st.markdown(
+    f"""
+    <style>
+    .reportview-container {{
+        background-color: {fundo};
+        color: {texto};
+    }}
+    .stTextInput > div {{
+        background-color: {fundo};
+        color: {texto};
+    }}
+    .stButton > button {{
+        background-color: {fundo};
+        color: {texto};
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # Título do app
 st.title("Dashboard de Atendimento")
 
@@ -90,11 +122,11 @@ elif tecnico:
     # Exibir os tempos totais
     st.markdown(
         f"""
-        <div style='background-color: #f0f0f0; padding: 10px; border-radius: 5px; text-align: center;'>
-            <strong>Tempo total em Incidentes:</strong> {formatted_incidentes}
+        <div style='background-color: {fundo}; padding: 10px; border-radius: 5px; text-align: center;'>
+            <strong style='color: {texto};'>Tempo total em Incidentes:</strong> {formatted_incidentes}
         </div>
-        <div style='background-color: #f0f0f0; padding: 10px; border-radius: 5px; text-align: center; margin-top: 10px;'>
-            <strong>Tempo total em Requisições:</strong> {formatted_requisicoes}
+        <div style='background-color: {fundo}; padding: 10px; border-radius: 5px; text-align: center; margin-top: 10px;'>
+            <strong style='color: {texto};'>Tempo total em Requisições:</strong> {formatted_requisicoes}
         </div>
         """,
         unsafe_allow_html=True
@@ -132,16 +164,6 @@ elif tecnico:
         fig_incidentes.update_yaxes(showgrid=False)
         st.plotly_chart(fig_incidentes)
 
-    # Gráfico de pizza (Esforços por fornecedor)
-    fornecedor_counts = filtered_df['Atribuído - Atribuído a um fornecedor'].value_counts().reset_index()
-    fornecedor_counts.columns = ['Fornecedor', 'Atendimentos']
-    if not fornecedor_counts.empty:
-        fig_pizza = px.pie(
-            fornecedor_counts,
-            names='Fornecedor',
-            values='Atendimentos',
-            title="Distribuição de Esforços por Fornecedor"
-        )
-        st.plotly_chart(fig_pizza)
 else:
     st.info("Selecione um técnico para exibir os dados.")
+
