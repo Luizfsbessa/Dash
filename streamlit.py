@@ -65,12 +65,19 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     if end_date:
         filtered_df = filtered_df[filtered_df['Data de abertura'] <= pd.to_datetime(end_date)]
 
-    # Calcular o total de horas por tipo
+    # Calcular o total de horas por tipo, com verificação de coluna
     incidentes_df = filtered_df[filtered_df['Tipo'] == 'Incidente']
     requisicoes_df = filtered_df[filtered_df['Tipo'] == 'Requisição']
 
-    total_incidentes = incidentes_df['Horas Decimais'].sum()
-    total_requisicoes = requisicoes_df['Horas Decimais'].sum()
+    if 'Horas Decimais' in incidentes_df.columns:
+        total_incidentes = incidentes_df['Horas Decimais'].sum()
+    else:
+        total_incidentes = 0  # Caso a coluna não exista
+
+    if 'Horas Decimais' in requisicoes_df.columns:
+        total_requisicoes = requisicoes_df['Horas Decimais'].sum()
+    else:
+        total_requisicoes = 0  # Caso a coluna não exista
 
     formatted_incidentes = format_hours_to_hms(total_incidentes)
     formatted_requisicoes = format_hours_to_hms(total_requisicoes)
