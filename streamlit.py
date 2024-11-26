@@ -297,7 +297,9 @@ if not incidentes_por_prioridade.empty:
         color='Prioridade',
         color_discrete_map=prioridade_cores
     )
-    fig_incidentes_pizza.update_traces(textfont=dict(color='white'))  # Cor do texto no gráfico de pizza
+    fig_incidentes_pizza.update_traces(
+        textfont=dict(color='white', size=14, weight='bold')  # Texto em negrito e aumento do tamanho
+    )
     fig_incidentes_pizza.update_layout(
         plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
         paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
@@ -314,7 +316,9 @@ if not requisicoes_por_prioridade.empty:
         color='Prioridade',
         color_discrete_map=prioridade_cores
     )
-    fig_requisicoes_pizza.update_traces(textfont=dict(color='white'))  # Cor do texto no gráfico de pizza
+    fig_requisicoes_pizza.update_traces(
+        textfont=dict(color='white', size=14, weight='bold')  # Texto em negrito e aumento do tamanho
+    )
     fig_requisicoes_pizza.update_layout(
         plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
         paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
