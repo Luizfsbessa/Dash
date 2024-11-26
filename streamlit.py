@@ -275,9 +275,16 @@ if not requisicoes_por_mes.empty:
 
     st.plotly_chart(fig_requisicoes)
 
-# Gráficos de Pizza - Distribuição de Incidentes e Requisições por Prioridade
-incidentes_por_prioridade = incidentes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
-requisicoes_por_prioridade = requisicoes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
+# Verificar se os DataFrames 'incidentes_df' e 'requisicoes_df' não estão vazios
+if 'incidentes_df' in locals() and not incidentes_df.empty:
+    incidentes_por_prioridade = incidentes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
+else:
+    st.error("O DataFrame 'incidentes_df' está vazio ou não foi carregado corretamente.")
+
+if 'requisicoes_df' in locals() and not requisicoes_df.empty:
+    requisicoes_por_prioridade = requisicoes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
+else:
+    st.error("O DataFrame 'requisicoes_df' está vazio ou não foi carregado corretamente.")
 
 # Definir cores personalizadas para cada prioridade
 prioridade_cores = {
@@ -287,7 +294,7 @@ prioridade_cores = {
     'Muito Alta': '#2D55263'
 }
 
-# Verificar se os DataFrames não estão vazios e exibir os gráficos de pizza
+# Verificar se os DataFrames de incidentes e requisições por prioridade não estão vazios e exibir os gráficos de pizza
 if not incidentes_por_prioridade.empty:
     fig_incidentes_pizza = px.pie(
         incidentes_por_prioridade,
@@ -325,4 +332,5 @@ if not requisicoes_por_prioridade.empty:
         font=dict(color="white"),  # Cor do texto do gráfico no modo escuro
     )
     st.plotly_chart(fig_requisicoes_pizza)
+
 
