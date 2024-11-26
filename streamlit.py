@@ -12,15 +12,6 @@ df['Data de abertura'] = pd.to_datetime(df['Data de abertura'], errors='coerce')
 # Adicionar a coluna 'Mês/Ano' apenas com mês e ano
 df['Mês/Ano'] = df['Data de abertura'].dt.to_period('M').astype(str)
 
-# Determinar a data inicial padrão com base na base de dados
-min_date = df['Data de abertura'].min()
-if pd.notnull(min_date):
-    default_start_date = min_date.replace(day=1)
-else:
-    default_start_date = None
-
-max_date = df['Data de abertura'].max()
-
 # Converter a coluna 'Tempo em atendimento' para horas decimais
 def time_to_hours(time_str):
     try:
@@ -28,13 +19,6 @@ def time_to_hours(time_str):
         return h + m / 60 + s / 3600
     except ValueError:
         return 0
-
-# Formatar horas decimais no formato 6680:02:58
-def format_hours_to_hms(decimal_hours):
-    h = int(decimal_hours)
-    m = int((decimal_hours - h) * 60)
-    s = int(((decimal_hours - h) * 60 - m) * 60)
-    return f"{h:02}:{m:02}:{s:02}"
 
 df['Horas Decimais'] = df['Tempo em atendimento'].apply(time_to_hours)
 
@@ -75,64 +59,59 @@ tecnico = st.selectbox(
 )
 
 # Filtro de intervalo de datas
-start_date = st.date_input(
-    "Data de Início", 
-    value=default_start_date, 
-    min_value=min_date, 
-    max_value=max_date, 
-    format="DD/MM/YYYY",
-    key="start_date"
-)
-
-end_date = st.date_input(
-    "Data de Fim", 
-    value=max_date, 
-    min_value=min_date, 
-    max_value=max_date, 
-    format="DD/MM/YYYY",
-    key="end_date"
-)
+start_date = st.date_input("Data de Início", value=df['Data de abertura'].min(), format="DD/MM/YYYY")
+end_date = st.date_input("Data de Fim", value=df['Data de abertura'].max(), format="DD/MM/YYYY")
 
 # Validar se as datas foram preenchidas corretamente
 if start_date and end_date and start_date > end_date:
     st.error("A data de início não pode ser maior que a data de fim.")
-elif tecnico:  # Só filtrar se o técnico foi selecionado
+else:
     # Filtragem de dados
-    filtered_df = df[df['Atribuído - Técnico'] == tecnico]
-    if start_date:
-        filtered_df = filtered_df[filtered_df['Data de abertura'] >= pd.to_datetime(start_date)]
-    if end_date:
-        filtered_df = filtered_df[filtered_df['Data de abertura'] <= pd.to_datetime(end_date)]
+    filtered_df = df[(df['Data de abertura'] >= pd.to_datetime(start_date)) & (df['Data de abertura'] <= pd.to_datetime(end_date))]
 
-    # Calcular o total de horas por tipo
+    if tecnico:
+        # Filtrar por técnico
+        filtered_df = filtered_df[filtered_df['Atribuído - Técnico'] == tecnico]
+
+    # Calcular a média, máximo e mínimo de horas por tipo (Incidente e Requisição)
     incidentes_df = filtered_df[filtered_df['Tipo'] == 'Incidente']
     requisicoes_df = filtered_df[filtered_df['Tipo'] == 'Requisição']
 
-    total_incidentes = incidentes_df['Horas Decimais'].sum()
-    total_requisicoes = requisicoes_df['Horas Decimais'].sum()
+    # Função para calcular as métricas
+    def calculate_metrics(df):
+        return {
+            'Média': df['Horas Decimais'].mean(),
+            'Máximo': df['Horas Decimais'].max(),
+            'Mínimo': df['Horas Decimais'].min()
+        }
 
-    formatted_incidentes = format_hours_to_hms(total_incidentes)
-    formatted_requisicoes = format_hours_to_hms(total_requisicoes)
+    # Obter as métricas para incidentes e requisições
+    incidentes_metrics = calculate_metrics(incidentes_df)
+    requisicoes_metrics = calculate_metrics(requisicoes_df)
 
-    # Exibir os tempos em atendimento com fundo cinza e texto em preto
-    if total_incidentes > 0:
-        st.markdown(
-            f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>Tempo total em Incidentes: <b>{formatted_incidentes}</b></div>",
-            unsafe_allow_html=True
-        )
+    # Criar DataFrame para plotar
+    metrics_df = pd.DataFrame({
+        'Métrica': ['Média', 'Máximo', 'Mínimo'],
+        'Incidentes': [incidentes_metrics['Média'], incidentes_metrics['Máximo'], incidentes_metrics['Mínimo']],
+        'Requisições': [requisicoes_metrics['Média'], requisicoes_metrics['Máximo'], requisicoes_metrics['Mínimo']]
+    })
 
-    if total_requisicoes > 0:
-        st.markdown(
-            f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>Tempo total em Requisições: <b>{formatted_requisicoes}</b></div>",
-            unsafe_allow_html=True
-        )
+    # Plotar o gráfico de barras agrupadas
+    fig = px.bar(
+        metrics_df,
+        x='Métrica',
+        y=['Incidentes', 'Requisições'],
+        barmode='group',
+        title="Tempo de Atendimento por Tipo - Média, Máximo e Mínimo",
+        labels={'value': 'Tempo em Horas', 'Métrica': 'Tipo de Métrica'},
+    )
 
-    # Gráficos de número de atendimentos por mês, separados por Tipo (Requisição e Incidente)
-    incidentes_por_mes = incidentes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
-    requisicoes_por_mes = requisicoes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
+    # Exibir o gráfico
+    st.plotly_chart(fig)
 
-    # Verificar se os DataFrames não estão vazios e exibir os gráficos
-    if not incidentes_por_mes.empty:
+    # Se houver incidentes, mostrar a tabela de incidentes por mês
+    if not incidentes_df.empty:
+        incidentes_por_mes = incidentes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
         fig_incidentes = px.bar(
             incidentes_por_mes,
             x='Mês/Ano',
@@ -148,14 +127,11 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)'
         )
-        fig_incidentes.update_xaxes(showgrid=False)
-        fig_incidentes.update_yaxes(
-            showgrid=False,      # Opcional: remove a grade do eixo Y
-            showticklabels=False # Remove os rótulos dos valores no eixo Y
-        )
         st.plotly_chart(fig_incidentes)
 
-    if not requisicoes_por_mes.empty:
+    # Se houver requisições, mostrar a tabela de requisições por mês
+    if not requisicoes_df.empty:
+        requisicoes_por_mes = requisicoes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
         fig_requisicoes = px.bar(
             requisicoes_por_mes,
             x='Mês/Ano',
@@ -171,12 +147,6 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)'
         )
-        fig_requisicoes.update_xaxes(showgrid=False)
-        fig_requisicoes.update_yaxes(
-            showgrid=False,      # Opcional: remove a grade do eixo Y
-            showticklabels=False # Remove os rótulos dos valores no eixo Y
-        )
         st.plotly_chart(fig_requisicoes)
-else:
-    st.info("Selecione um técnico para exibir os dados.")
+
 
