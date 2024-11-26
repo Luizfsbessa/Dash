@@ -275,16 +275,19 @@ if not requisicoes_por_mes.empty:
 
     st.plotly_chart(fig_requisicoes)
 
-# Verificar se os DataFrames 'incidentes_df' e 'requisicoes_df' não estão vazios
-if 'incidentes_df' in locals() and not incidentes_df.empty:
+
+
+
+# Verificar se 'incidentes_df' e 'requisicoes_df' existem no ambiente e não estão vazios
+if 'incidentes_df' in locals() and incidentes_df is not None and not incidentes_df.empty:
     incidentes_por_prioridade = incidentes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
 else:
-    st.error("O DataFrame 'incidentes_df' está vazio ou não foi carregado corretamente.")
+    st.error("O DataFrame 'incidentes_df' não foi carregado ou está vazio.")
 
-if 'requisicoes_df' in locals() and not requisicoes_df.empty:
+if 'requisicoes_df' in locals() and requisicoes_df is not None and not requisicoes_df.empty:
     requisicoes_por_prioridade = requisicoes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
 else:
-    st.error("O DataFrame 'requisicoes_df' está vazio ou não foi carregado corretamente.")
+    st.error("O DataFrame 'requisicoes_df' não foi carregado ou está vazio.")
 
 # Definir cores personalizadas para cada prioridade
 prioridade_cores = {
@@ -294,7 +297,7 @@ prioridade_cores = {
     'Muito Alta': '#2D55263'
 }
 
-# Verificar se os DataFrames de incidentes e requisições por prioridade não estão vazios e exibir os gráficos de pizza
+# Exibir gráfico de pizza para incidentes, se o DataFrame não estiver vazio
 if not incidentes_por_prioridade.empty:
     fig_incidentes_pizza = px.pie(
         incidentes_por_prioridade,
@@ -304,16 +307,9 @@ if not incidentes_por_prioridade.empty:
         color='Prioridade',
         color_discrete_map=prioridade_cores
     )
-    fig_incidentes_pizza.update_traces(
-        textfont=dict(color='white', size=14, weight='bold')  # Texto em negrito e aumento do tamanho
-    )
-    fig_incidentes_pizza.update_layout(
-        plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
-        paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
-        font=dict(color="white"),  # Cor do texto do gráfico no modo escuro
-    )
     st.plotly_chart(fig_incidentes_pizza)
 
+# Exibir gráfico de pizza para requisições, se o DataFrame não estiver vazio
 if not requisicoes_por_prioridade.empty:
     fig_requisicoes_pizza = px.pie(
         requisicoes_por_prioridade,
@@ -323,14 +319,5 @@ if not requisicoes_por_prioridade.empty:
         color='Prioridade',
         color_discrete_map=prioridade_cores
     )
-    fig_requisicoes_pizza.update_traces(
-        textfont=dict(color='white', size=14, weight='bold')  # Texto em negrito e aumento do tamanho
-    )
-    fig_requisicoes_pizza.update_layout(
-        plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
-        paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
-        font=dict(color="white"),  # Cor do texto do gráfico no modo escuro
-    )
     st.plotly_chart(fig_requisicoes_pizza)
-
 
