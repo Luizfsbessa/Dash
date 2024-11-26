@@ -12,23 +12,6 @@ df['Data de abertura'] = pd.to_datetime(df['Data de abertura'], errors='coerce')
 # Adicionar uma coluna para o período (ano-mês)
 df['Período'] = df['Data de abertura'].dt.to_period('M')
 
-# Converter a coluna 'Tempo em atendimento' para horas decimais
-def time_to_hours(time_str):
-    try:
-        h, m, s = map(int, time_str.split(':'))
-        return h + m / 60 + s / 3600
-    except ValueError:
-        return 0
-
-# Formatar horas decimais no formato hh:mm:ss
-def format_hours_to_hms(decimal_hours):
-    h = int(decimal_hours)
-    m = int((decimal_hours - h) * 60)
-    s = int(((decimal_hours - h) * 60 - m) * 60)
-    return f"{h:02}:{m:02}:{s:02}"
-
-df['Horas Decimais'] = df['Tempo em atendimento'].apply(time_to_hours)
-
 # Adicionar toggle para o modo noturno
 modo_noturno = st.checkbox("Ativar Modo Noturno", value=False)
 
@@ -48,14 +31,6 @@ st.markdown(
         background-color: {fundo};
         color: {texto};
     }}
-    .stTextInput > div {{
-        background-color: {fundo};
-        color: {texto};
-    }}
-    .stButton > button {{
-        background-color: {fundo};
-        color: {texto};
-    }}
     </style>
     """,
     unsafe_allow_html=True
@@ -63,13 +38,6 @@ st.markdown(
 
 # Título do app
 st.title("Dashboard de Atendimento")
-
-# Filtro de técnico
-tecnico = st.selectbox(
-    "Selecionar Técnico:",
-    options=[""] + sorted(df['Atribuído - Técnico'].dropna().unique()),  # Adicionar opção em branco
-    format_func=lambda x: "Selecione um técnico" if x == "" else x  # Placeholder para a opção em branco
-)
 
 # Determinar a data inicial e final padrão com base na base de dados
 min_date = df['Data de abertura'].min()
@@ -100,9 +68,9 @@ end_date = st.date_input(
 # Validar se as datas foram preenchidas corretamente
 if start_date and end_date and start_date > end_date:
     st.error("A data de início não pode ser maior que a data de fim.")
-elif tecnico:
-    # Filtragem de dados
-    filtered_df = df[df['Atribuído - Técnico'] == tecnico]
+else:
+    # Filtrar dados pelo intervalo de datas
+    filtered_df = df.copy()
     if start_date:
         filtered_df = filtered_df[filtered_df['Data de abertura'] >= pd.to_datetime(start_date)]
     if end_date:
@@ -112,36 +80,15 @@ elif tecnico:
     incidentes_df = filtered_df[filtered_df['Tipo'] == 'Incidente']
     requisicoes_df = filtered_df[filtered_df['Tipo'] == 'Requisição']
 
-    # Calcular o total de atendimentos e horas
-    total_incidentes = incidentes_df['Horas Decimais'].sum()
-    total_requisicoes = requisicoes_df['Horas Decimais'].sum()
-
-    formatted_incidentes = format_hours_to_hms(total_incidentes)
-    formatted_requisicoes = format_hours_to_hms(total_requisicoes)
-
-    # Exibir os tempos totais
-    st.markdown(
-        f"""
-        <div style='background-color: {fundo}; padding: 10px; border-radius: 5px; text-align: center;'>
-            <strong style='color: {texto};'>Tempo total em Incidentes:</strong> {formatted_incidentes}
-        </div>
-        <div style='background-color: {fundo}; padding: 10px; border-radius: 5px; text-align: center; margin-top: 10px;'>
-            <strong style='color: {texto};'>Tempo total em Requisições:</strong> {formatted_requisicoes}
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
     # Gráfico de número de atendimentos por mês (Requisições)
     requisicoes_por_mes = requisicoes_df.groupby('Período').size().reset_index(name='Atendimentos')
-    st.write("Debug Requisições:", requisicoes_por_mes)  # Debug adicional
     if not requisicoes_por_mes.empty:
         fig_requisicoes = px.bar(
             requisicoes_por_mes,
             x='Período',
             y='Atendimentos',
             title="Atendimentos por Mês - Requisições",
-            labels={'Período': '', 'Atendimentos': ''},
+            labels={'Período': '', 'Atendimentos': 'Quantidade'},
             template="simple_white"
         )
         fig_requisicoes.update_layout(showlegend=False, xaxis_title=None, yaxis_title=None)
@@ -151,14 +98,13 @@ elif tecnico:
 
     # Gráfico de número de atendimentos por mês (Incidentes)
     incidentes_por_mes = incidentes_df.groupby('Período').size().reset_index(name='Atendimentos')
-    st.write("Debug Incidentes:", incidentes_por_mes)  # Debug adicional
     if not incidentes_por_mes.empty:
         fig_incidentes = px.bar(
             incidentes_por_mes,
             x='Período',
             y='Atendimentos',
             title="Atendimentos por Mês - Incidentes",
-            labels={'Período': '', 'Atendimentos': ''},
+            labels={'Período': '', 'Atendimentos': 'Quantidade'},
             template="simple_white"
         )
         fig_incidentes.update_layout(showlegend=False, xaxis_title=None, yaxis_title=None)
@@ -166,5 +112,6 @@ elif tecnico:
         fig_incidentes.update_yaxes(showgrid=False)
         st.plotly_chart(fig_incidentes)
 
-else:
-    st.info("Selecione um técnico para exibir os dados.")
+    # Exibir mensagem se não houver dados
+    if requisicoes_por_mes.empty and incidentes_por_mes.empty:
+        st.warning("Não há dados disponíveis para o período selecionado.")
