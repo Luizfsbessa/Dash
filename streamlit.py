@@ -169,7 +169,7 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             y='Número de Atendimentos',
             text='Número de Atendimentos',
             title="Número de Atendimentos por Mês - Incidentes",
-            color_discrete_sequence=['#79AB86']  # Cor para Incidentes
+            color_discrete_sequence=['#1EA4B6']  # Cor para Incidentes
         )
         fig_incidentes.update_traces(texttemplate='<b>%{text}</b>', textposition='outside')
         fig_incidentes.update_layout(
@@ -197,7 +197,7 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             y='Número de Atendimentos',
             text='Número de Atendimentos',
             title="Número de Atendimentos por Mês - Requisições",
-            color_discrete_sequence=['#2A2E36']  # Cor para Requisições
+            color_discrete_sequence=['#00C6E0']  # Cor para Requisições
         )
         fig_requisicoes.update_traces(texttemplate='<b>%{text}</b>', textposition='outside')
         fig_requisicoes.update_layout(
