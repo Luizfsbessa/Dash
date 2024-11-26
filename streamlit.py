@@ -117,13 +117,15 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     # Exibir os tempos em atendimento com fundo cinza e texto em preto
     if total_incidentes > 0:
         st.markdown(
-            f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>Tempo total em Incidentes: <b>{formatted_incidentes}</b></div>",
+            f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>"
+            f"<b>Tempo total em Incidentes:</b> {formatted_incidentes}</div>",
             unsafe_allow_html=True
         )
 
     if total_requisicoes > 0:
         st.markdown(
-            f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>Tempo total em Requisições: <b>{formatted_requisicoes}</b></div>",
+            f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>"
+            f"<b>Tempo total em Requisições:</b> {formatted_requisicoes}</div>",
             unsafe_allow_html=True
         )
 
@@ -179,5 +181,58 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             showticklabels=False # Remove os rótulos dos valores no eixo Y
         )
         st.plotly_chart(fig_requisicoes)
+
+    # Gráfico de Pizza para "Prioridade" - Segregado por Tipo (Incidente e Requisição)
+    # Criar duas colunas para exibir os gráficos lado a lado
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if not incidentes_df.empty and 'Prioridade' in incidentes_df.columns:
+            prioridade_incidentes = incidentes_df['Prioridade'].value_counts().reset_index()
+            prioridade_incidentes.columns = ['Prioridade', 'Quantidade']
+
+            fig_pizza_incidentes = px.pie(
+                prioridade_incidentes,
+                names='Prioridade',
+                values='Quantidade',
+                title="Distribuição de Prioridades - Incidentes",
+                color_discrete_sequence=px.colors.sequential.Teal,
+            )
+            fig_pizza_incidentes.update_traces(textinfo='percent+label')  # Mostrar porcentagem e rótulos no gráfico
+            fig_pizza_incidentes.update_layout(
+                showlegend=True, 
+                legend_title_text="Prioridade",
+                font=dict(color="black"),  # Cor do texto
+                plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+                paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+            )
+            st.plotly_chart(fig_pizza_incidentes)
+        else:
+            st.warning("Não há dados de Prioridade para Incidentes.")
+
+    with col2:
+        if not requisicoes_df.empty and 'Prioridade' in requisicoes_df.columns:
+            prioridade_requisicoes = requisicoes_df['Prioridade'].value_counts().reset_index()
+            prioridade_requisicoes.columns = ['Prioridade', 'Quantidade']
+
+            fig_pizza_requisicoes = px.pie(
+                prioridade_requisicoes,
+                names='Prioridade',
+                values='Quantidade',
+                title="Distribuição de Prioridades - Requisições",
+                color_discrete_sequence=px.colors.sequential.Teal,
+            )
+            fig_pizza_requisicoes.update_traces(textinfo='percent+label')  # Mostrar porcentagem e rótulos no gráfico
+            fig_pizza_requisicoes.update_layout(
+                showlegend=True, 
+                legend_title_text="Prioridade",
+                font=dict(color="black"),  # Cor do texto
+                plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+                paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+            )
+            st.plotly_chart(fig_pizza_requisicoes)
+        else:
+            st.warning("Não há dados de Prioridade para Requisições.")
+
 else:
     st.info("Selecione um técnico para exibir os dados.")
