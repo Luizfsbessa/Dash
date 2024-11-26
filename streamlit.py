@@ -108,29 +108,8 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     incidentes_df = filtered_df[filtered_df['Tipo'] == 'Incidente']
     requisicoes_df = filtered_df[filtered_df['Tipo'] == 'Requisição']
 
-    total_incidentes = incidentes_df['Horas Decimais'].sum()
-    total_requisicoes = requisicoes_df['Horas Decimais'].sum()
-
-    formatted_incidentes = format_hours_to_hms(total_incidentes)
-    formatted_requisicoes = format_hours_to_hms(total_requisicoes)
-
-    # Exibir os tempos em atendimento com fundo cinza e texto em preto
-    if total_incidentes > 0:
-        st.markdown(
-            f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>"
-            f"<b>Tempo total em Incidentes:</b> {formatted_incidentes}</div>",
-            unsafe_allow_html=True
-        )
-
-    if total_requisicoes > 0:
-        st.markdown(
-            f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>"
-            f"<b>Tempo total em Requisições:</b> {formatted_requisicoes}</div>",
-            unsafe_allow_html=True
-        )
-
     # Exibir os tempos em atendimento com informações detalhadas de prioridade
-    if total_incidentes > 0:
+    if not incidentes_df.empty:
         # Cálculo de tempos médios por prioridade em Incidentes
         tempos_incidentes = incidentes_df.groupby('Prioridade')['Horas Decimais'].agg(['mean', 'max']).reset_index()
         tempos_incidentes['Média'] = tempos_incidentes['mean'].apply(format_hours_to_hms)
@@ -145,7 +124,7 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
         st.markdown(
             f"""
             <div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>
-                <b>Tempo total em Incidentes:</b> {formatted_incidentes}
+                <b>Tempo total em Incidentes:</b> {format_hours_to_hms(incidentes_df['Horas Decimais'].sum())}
                 <ul>
                     {incidentes_detalhes}
                 </ul>
@@ -154,7 +133,7 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             unsafe_allow_html=True
         )
 
-    if total_requisicoes > 0:
+    if not requisicoes_df.empty:
         # Cálculo de tempos médios por prioridade em Requisições
         tempos_requisicoes = requisicoes_df.groupby('Prioridade')['Horas Decimais'].agg(['mean', 'max']).reset_index()
         tempos_requisicoes['Média'] = tempos_requisicoes['mean'].apply(format_hours_to_hms)
@@ -169,7 +148,7 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
         st.markdown(
             f"""
             <div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>
-                <b>Tempo total em Requisições:</b> {formatted_requisicoes}
+                <b>Tempo total em Requisições:</b> {format_hours_to_hms(requisicoes_df['Horas Decimais'].sum())}
                 <ul>
                     {requisicoes_detalhes}
                 </ul>
@@ -234,3 +213,14 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
         )
 
         st.plotly_chart(fig_requisicoes)
+
+    # Gráfico de Pizza - Distribuição por Tipo de Atendimento (Incidente ou Requisição)
+    tipo_atendimento = df.groupby('Tipo').size().reset_index(name='Número de Atendimentos')
+    if not tipo_atendimento.empty:
+        fig_pizza = px.pie(
+            tipo_atendimento,
+            names='Tipo',
+            values='Número de Atendimentos',
+            title="Distribuição de Atendimentos por Tipo",
+        )
+        st.plotly_chart(fig_pizza)
