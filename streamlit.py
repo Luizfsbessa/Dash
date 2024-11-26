@@ -45,6 +45,7 @@ st.title("Dashboard de Atendimento")
 box_style = "background-color: #C1D8E3; padding: 15px; color: black; font-size: 16px; border-radius: 5px; margin-bottom: 10px;"
 
 # Filtro de técnico
+st.write("<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>", unsafe_allow_html=True)
 tecnico = st.selectbox(
     "Selecionar Técnico:",
     options=[""] + sorted(df['Atribuído - Técnico'].dropna().unique()),
@@ -52,12 +53,11 @@ tecnico = st.selectbox(
     key="tecnico",
     help="Escolha o técnico para filtrar os dados",
 )
+st.write("</div>", unsafe_allow_html=True)
 
 # Filtro de intervalo de datas
+st.write("<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>", unsafe_allow_html=True)
 st.write("Selecionar Intervalo de Datas:")
-
-# Definindo um estilo padrão para os campos de data e dropbox
-date_box_style = "background-color: #C1D8E3; padding: 15px; color: black; font-size: 16px; border-radius: 5px; margin-bottom: 10px; width: 100%;"
 
 start_date = st.date_input(
     "Data de Início", 
@@ -76,6 +76,7 @@ end_date = st.date_input(
     format="DD/MM/YYYY",
     key="end_date"
 )
+st.write("</div>", unsafe_allow_html=True)
 
 # Validar se as datas foram preenchidas corretamente
 if start_date and end_date and start_date > end_date:
@@ -133,4 +134,3 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     st.plotly_chart(fig)
 else:
     st.info("Selecione um técnico para exibir os dados.")
-
