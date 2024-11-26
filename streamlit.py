@@ -197,7 +197,7 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             y='Número de Atendimentos',
             text='Número de Atendimentos',
             title="Número de Atendimentos por Mês - Requisições",
-            color_discrete_sequence=['#967778']  # Cor para Requisições
+            color_discrete_sequence=['#2A2E36']  # Cor para Requisições
         )
         fig_requisicoes.update_traces(texttemplate='<b>%{text}</b>', textposition='outside')
         fig_requisicoes.update_layout(
