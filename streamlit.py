@@ -293,7 +293,10 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             color_discrete_map=prioridade_cores
         )
         # Aplicar rótulo em negrito
-        fig_incidentes_pizza.update_traces(texttemplate='<b>%{text}</b>', textinfo='percent+label')
+        fig_incidentes_pizza.update_traces(
+            texttemplate='{label}: <b>%{text}</b>', 
+            textinfo='percent+label'
+        )
         st.plotly_chart(fig_incidentes_pizza)
 
     if not requisicoes_por_prioridade.empty:
@@ -306,5 +309,8 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             color_discrete_map=prioridade_cores
         )
         # Aplicar rótulo em negrito
-        fig_requisicoes_pizza.update_traces(texttemplate='<b>%{text}</b>', textinfo='percent+label')
+        fig_requisicoes_pizza.update_traces(
+            texttemplate='{label}: <b>%{text}</b>', 
+            textinfo='percent+label'
+        )
         st.plotly_chart(fig_requisicoes_pizza)
