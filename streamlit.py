@@ -70,8 +70,29 @@ tecnico = st.selectbox(
     "Selecionar Técnico:",
     options=[""] + sorted(df['Atribuído - Técnico'].dropna().unique()),
     format_func=lambda x: "Selecione um técnico" if x == "" else x,
-    key="tecnico",
+    key="tecnico_selectbox",  # Chave única
     help="Escolha o técnico para filtrar os dados",
+)
+
+# Filtro de intervalo de datas
+start_date = st.date_input(
+    "Data de Início", 
+    value=default_start_date, 
+    min_value=min_date, 
+    max_value=max_date, 
+    format="DD/MM/YYYY",
+    key="start_date_input",  # Chave única
+    help="Escolha a data inicial para o filtrar os dados",
+)
+
+end_date = st.date_input(
+    "Data de Fim", 
+    value=max_date, 
+    min_value=min_date, 
+    max_value=max_date, 
+    format="DD/MM/YYYY",
+    key="end_date_input",  # Chave única
+    help="Escolha a data final para o filtrar os dados",
 )
 
 # Estilo para garantir que o texto fique visível no modo escuro
@@ -94,36 +115,6 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
-
-# Filtro de técnico
-tecnico = st.selectbox(
-    "Selecionar Técnico:",
-    options=[""] + sorted(df['Atribuído - Técnico'].dropna().unique()),
-    format_func=lambda x: "Selecione um técnico" if x == "" else x,
-    key="tecnico",
-    help="Escolha o técnico para filtrar os dados",
-)
-
-# Filtro de intervalo de datas
-start_date = st.date_input(
-    "Data de Início", 
-    value=default_start_date, 
-    min_value=min_date, 
-    max_value=max_date, 
-    format="DD/MM/YYYY",
-    key="start_date",  
-    help="Escolha a data inicial para o filtrar os dados",
-)
-
-end_date = st.date_input(
-    "Data de Fim", 
-    value=max_date, 
-    min_value=min_date, 
-    max_value=max_date, 
-    format="DD/MM/YYYY",
-    key="end_date",  
-    help="Escolha a data final para o filtrar os dados",
-)
 
 # Estilo para garantir visibilidade no modo claro e escuro
 st.markdown("""
@@ -150,6 +141,7 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
+
 
 
 
