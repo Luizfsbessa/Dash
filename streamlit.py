@@ -41,28 +41,40 @@ df['Horas Decimais'] = df['Tempo em atendimento'].apply(time_to_hours)
 # Título do app
 st.title("Dashboard de Atendimento")
 
+# Definindo o estilo para as caixas de seleção e dropbox
+box_style = "background-color: #C1D8E3; padding: 15px; color: black; font-size: 16px; border-radius: 5px; margin-bottom: 10px;"
+
 # Filtro de técnico
 tecnico = st.selectbox(
     "Selecionar Técnico:",
     options=[""] + sorted(df['Atribuído - Técnico'].dropna().unique()),
-    format_func=lambda x: "Selecione um técnico" if x == "" else x
+    format_func=lambda x: "Selecione um técnico" if x == "" else x,
+    key="tecnico",
+    help="Escolha o técnico para filtrar os dados",
 )
 
 # Filtro de intervalo de datas
 st.write("Selecionar Intervalo de Datas:")
+
+# Definindo um estilo padrão para os campos de data e dropbox
+date_box_style = "background-color: #C1D8E3; padding: 15px; color: black; font-size: 16px; border-radius: 5px; margin-bottom: 10px; width: 100%;"
+
 start_date = st.date_input(
     "Data de Início", 
     value=default_start_date, 
     min_value=min_date, 
     max_value=max_date, 
-    format="DD/MM/YYYY"
+    format="DD/MM/YYYY",
+    key="start_date"
 )
+
 end_date = st.date_input(
     "Data de Fim", 
     value=max_date, 
     min_value=min_date, 
     max_value=max_date, 
-    format="DD/MM/YYYY"
+    format="DD/MM/YYYY",
+    key="end_date"
 )
 
 # Validar se as datas foram preenchidas corretamente
@@ -88,12 +100,12 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
 
     # Exibir os tempos em atendimento com fundo cinza e texto em preto
     st.markdown(
-        f"<div style='background-color: #f5f5f5; padding: 15px; color: black; font-size: 16px; border-radius: 5px; margin-bottom: 10px;'>Tempo total em Incidentes: <b>{formatted_incidentes}</b></div>",
+        f"<div style='{box_style}'>Tempo total em Incidentes: <b>{formatted_incidentes}</b></div>",
         unsafe_allow_html=True
     )
 
     st.markdown(
-        f"<div style='background-color: #f5f5f5; padding: 15px; color: black; font-size: 16px; border-radius: 5px; margin-bottom: 10px;'>Tempo total em Requisições: <b>{formatted_requisicoes}</b></div>",
+        f"<div style='{box_style}'>Tempo total em Requisições: <b>{formatted_requisicoes}</b></div>",
         unsafe_allow_html=True
     )
 
@@ -121,3 +133,4 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     st.plotly_chart(fig)
 else:
     st.info("Selecione um técnico para exibir os dados.")
+
