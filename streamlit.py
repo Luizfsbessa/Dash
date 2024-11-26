@@ -253,14 +253,3 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
         )
         st.plotly_chart(fig_requisicoes_pizza)
 
-    # Gráfico de Pizza - Distribuição por Tipo de Atendimento (Incidente ou Requisição)
-    tipo_atendimento = df.groupby('Tipo').size().reset_index(name='Número de Atendimentos')
-    if not tipo_atendimento.empty:
-        fig_pizza = px.pie(
-            tipo_atendimento,
-            names='Tipo',
-            values='Número de Atendimentos',
-            title="Distribuição de Atendimentos por Tipo",
-        )
-        st.plotly_chart(fig_pizza)
-
