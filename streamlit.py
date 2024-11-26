@@ -102,43 +102,46 @@ elif tecnico:
 
     # Gráfico de número de atendimentos por mês (Requisições)
     requisicoes_por_mes = requisicoes_df.groupby('Período').size().reset_index(name='Atendimentos')
-    fig_requisicoes = px.bar(
-        requisicoes_por_mes,
-        x='Período',
-        y='Atendimentos',
-        title="Atendimentos por Mês - Requisições",
-        labels={'Período': '', 'Atendimentos': ''},
-        template="simple_white"
-    )
-    fig_requisicoes.update_layout(showlegend=False, xaxis_title=None, yaxis_title=None)
-    fig_requisicoes.update_xaxes(showgrid=False)
-    fig_requisicoes.update_yaxes(showgrid=False)
-    st.plotly_chart(fig_requisicoes)
+    if not requisicoes_por_mes.empty:
+        fig_requisicoes = px.bar(
+            requisicoes_por_mes,
+            x='Período',
+            y='Atendimentos',
+            title="Atendimentos por Mês - Requisições",
+            labels={'Período': '', 'Atendimentos': ''},
+            template="simple_white"
+        )
+        fig_requisicoes.update_layout(showlegend=False, xaxis_title=None, yaxis_title=None)
+        fig_requisicoes.update_xaxes(showgrid=False)
+        fig_requisicoes.update_yaxes(showgrid=False)
+        st.plotly_chart(fig_requisicoes)
 
     # Gráfico de número de atendimentos por mês (Incidentes)
     incidentes_por_mes = incidentes_df.groupby('Período').size().reset_index(name='Atendimentos')
-    fig_incidentes = px.bar(
-        incidentes_por_mes,
-        x='Período',
-        y='Atendimentos',
-        title="Atendimentos por Mês - Incidentes",
-        labels={'Período': '', 'Atendimentos': ''},
-        template="simple_white"
-    )
-    fig_incidentes.update_layout(showlegend=False, xaxis_title=None, yaxis_title=None)
-    fig_incidentes.update_xaxes(showgrid=False)
-    fig_incidentes.update_yaxes(showgrid=False)
-    st.plotly_chart(fig_incidentes)
+    if not incidentes_por_mes.empty:
+        fig_incidentes = px.bar(
+            incidentes_por_mes,
+            x='Período',
+            y='Atendimentos',
+            title="Atendimentos por Mês - Incidentes",
+            labels={'Período': '', 'Atendimentos': ''},
+            template="simple_white"
+        )
+        fig_incidentes.update_layout(showlegend=False, xaxis_title=None, yaxis_title=None)
+        fig_incidentes.update_xaxes(showgrid=False)
+        fig_incidentes.update_yaxes(showgrid=False)
+        st.plotly_chart(fig_incidentes)
 
     # Gráfico de pizza (Esforços por fornecedor)
     fornecedor_counts = filtered_df['Atribuído - Atribuído a um fornecedor'].value_counts().reset_index()
     fornecedor_counts.columns = ['Fornecedor', 'Atendimentos']
-    fig_pizza = px.pie(
-        fornecedor_counts,
-        names='Fornecedor',
-        values='Atendimentos',
-        title="Distribuição de Esforços por Fornecedor"
-    )
-    st.plotly_chart(fig_pizza)
+    if not fornecedor_counts.empty:
+        fig_pizza = px.pie(
+            fornecedor_counts,
+            names='Fornecedor',
+            values='Atendimentos',
+            title="Distribuição de Esforços por Fornecedor"
+        )
+        st.plotly_chart(fig_pizza)
 else:
     st.info("Selecione um técnico para exibir os dados.")
