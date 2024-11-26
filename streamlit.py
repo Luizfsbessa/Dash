@@ -157,7 +157,7 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             unsafe_allow_html=True
         )
 
-       # Gráficos de número de atendimentos por mês, separados por Tipo (Requisição e Incidente)
+      # Gráficos de número de atendimentos por mês, separados por Tipo (Requisição e Incidente)
     incidentes_por_mes = incidentes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
     requisicoes_por_mes = requisicoes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
 
@@ -169,6 +169,7 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             y='Número de Atendimentos',
             text='Número de Atendimentos',
             title="Número de Atendimentos por Mês - Incidentes",
+            color_discrete_sequence=['#79AB86']  # Cor para Incidentes
         )
         fig_incidentes.update_traces(texttemplate='<b>%{text}</b>', textposition='outside')
         fig_incidentes.update_layout(
@@ -196,6 +197,7 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             y='Número de Atendimentos',
             text='Número de Atendimentos',
             title="Número de Atendimentos por Mês - Requisições",
+            color_discrete_sequence=['#967778']  # Cor para Requisições
         )
         fig_requisicoes.update_traces(texttemplate='<b>%{text}</b>', textposition='outside')
         fig_requisicoes.update_layout(
@@ -220,6 +222,14 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     incidentes_por_prioridade = incidentes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
     requisicoes_por_prioridade = requisicoes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
 
+    # Definir cores personalizadas para cada prioridade
+    prioridade_cores = {
+        'Baixa': '#2BABA2',
+        'Média': '#00EBDB',
+        'Alta': '#366B68',
+        'Muito Alta': '#965332'
+    }
+
     # Verificar se os DataFrames não estão vazios e exibir os gráficos de pizza
     if not incidentes_por_prioridade.empty:
         fig_incidentes_pizza = px.pie(
@@ -227,6 +237,8 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             names='Prioridade',
             values='Número de Atendimentos',
             title="Distribuição de Incidentes por Prioridade",
+            color='Prioridade',
+            color_discrete_map=prioridade_cores
         )
         st.plotly_chart(fig_incidentes_pizza)
 
@@ -236,6 +248,8 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             names='Prioridade',
             values='Número de Atendimentos',
             title="Distribuição de Requisições por Prioridade",
+            color='Prioridade',
+            color_discrete_map=prioridade_cores
         )
         st.plotly_chart(fig_requisicoes_pizza)
 
@@ -249,3 +263,4 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             title="Distribuição de Atendimentos por Tipo",
         )
         st.plotly_chart(fig_pizza)
+
