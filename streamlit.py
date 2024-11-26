@@ -236,3 +236,45 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
 
 else:
     st.info("Selecione um técnico para exibir os dados.")
+# Dados simulados (substitua pelo seu DataFrame)
+dados = {
+    "Prioridade": ["Baixa", "Média", "Alta", "Muito Alta"],
+    "Média (Horas)": [3.75, 2.5, 1.25, 0.75],  # Em horas decimais
+    "Máximo (Horas)": [7.5, 4, 2.75, 1.5]  # Em horas decimais
+}
+
+# Criar DataFrame
+df_prioridade = pd.DataFrame(dados)
+
+# Formatar as horas em HH:MM:SS
+def format_hours_to_hms(decimal_hours):
+    h = int(decimal_hours)
+    m = int((decimal_hours - h) * 60)
+    s = int(((decimal_hours - h) * 60 - m) * 60)
+    return f"{h:02}:{m:02}:{s:02}"
+
+df_prioridade["Média Formatada"] = df_prioridade["Média (Horas)"].apply(format_hours_to_hms)
+df_prioridade["Máximo Formatado"] = df_prioridade["Máximo (Horas)"].apply(format_hours_to_hms)
+
+# Markdown para introdução
+st.markdown("### Perfil de Incidentes por Prioridade")
+for i, row in df_prioridade.iterrows():
+    st.markdown(f"- **Prioridade {row['Prioridade']}**: Média de Atendimento - `{row['Média Formatada']}`")
+
+# Gráfico de Barras
+fig = px.bar(
+    df_prioridade,
+    x="Prioridade",
+    y="Média (Horas)",
+    title="Média de Atendimento por Prioridade",
+    labels={"Média (Horas)": "Média de Atendimento (Horas)", "Prioridade": "Prioridade"},
+    color="Prioridade",
+    text=df_prioridade["Média Formatada"],
+    color_discrete_sequence=px.colors.sequential.Teal
+)
+fig.update_traces(textposition="outside")
+st.plotly_chart(fig)
+
+# Tabela Interativa
+st.markdown("### Detalhes por Prioridade")
+st.dataframe(df_prioridade[["Prioridade", "Média Formatada", "Máximo Formatado"]], use_container_width=True)
