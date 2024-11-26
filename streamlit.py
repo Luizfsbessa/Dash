@@ -9,8 +9,14 @@ df = pd.read_excel(file_path)
 # Certificar-se de que a coluna 'Data de abertura' está no formato datetime
 df['Data de abertura'] = pd.to_datetime(df['Data de abertura'], errors='coerce')
 
-# Criar uma nova coluna para o mês/ano para os gráficos
-df['Mês/Ano'] = df['Data de abertura'].dt.to_period('M').astype(str)
+# Determinar a data inicial padrão com base na base de dados
+min_date = df['Data de abertura'].min()
+if pd.notnull(min_date):
+    default_start_date = min_date.replace(day=1)
+else:
+    default_start_date = None
+
+max_date = df['Data de abertura'].max()
 
 # Converter a coluna 'Tempo em atendimento' para horas decimais
 def time_to_hours(time_str):
@@ -29,34 +35,6 @@ def format_hours_to_hms(decimal_hours):
 
 df['Horas Decimais'] = df['Tempo em atendimento'].apply(time_to_hours)
 
-# Função para modo noturno
-def apply_dark_mode():
-    st.markdown(
-        """
-        <style>
-        div[data-testid="stSidebar"] {
-            background-color: #262730;
-        }
-        div[data-baseweb="select"] {
-            background-color: #1e1e1e;
-        }
-        div[data-baseweb="select"] * {
-            color: #f0f0f0 !important;
-        }
-        div[data-testid="stMarkdownContainer"] {
-            color: #f0f0f0;
-        }
-        h1, h2, h3, h4, h5, h6 {
-            color: #f0f0f0;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
-# Ativar modo noturno
-apply_dark_mode()
-
 # Título do app
 st.title("Dashboard de Atendimento")
 
@@ -66,15 +44,6 @@ tecnico = st.selectbox(
     options=[""] + sorted(df['Atribuído - Técnico'].dropna().unique()),
     format_func=lambda x: "Selecione um técnico" if x == "" else x
 )
-
-# Determinar a data inicial e final padrão com base na base de dados
-min_date = df['Data de abertura'].min()
-if pd.notnull(min_date):
-    default_start_date = min_date.replace(day=1)
-else:
-    default_start_date = None
-
-max_date = df['Data de abertura'].max()
 
 # Filtro de intervalo de datas
 st.write("Selecionar Intervalo de Datas:")
@@ -127,33 +96,18 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
         unsafe_allow_html=True
     )
 
-    # Gráfico de Incidentes por mês
-    fig_incidentes = px.bar(
-        incidentes_df.groupby('Mês/Ano').size().reset_index(name='Número de Incidentes'),
-        x='Mês/Ano',
-        y='Número de Incidentes',
-        title="Incidentes por Mês",
-        labels={'Mês/Ano': '', 'Número de Incidentes': ''},
-    )
-    fig_incidentes.update_layout(showlegend=False, xaxis_title=None, yaxis_title=None, plot_bgcolor="#1e1e1e", paper_bgcolor="#1e1e1e")
-    fig_incidentes.update_xaxes(showgrid=False, zeroline=False)
-    fig_incidentes.update_yaxes(showgrid=False, zeroline=False)
+    # Gráfico de número de atendimentos por mês
+    df['Mês/Ano'] = df['Data de abertura'].dt.to_period('M').astype(str)
+    atendimentos_por_mes = filtered_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
 
-    # Gráfico de Requisições por mês
-    fig_requisicoes = px.bar(
-        requisicoes_df.groupby('Mês/Ano').size().reset_index(name='Número de Requisições'),
+    fig = px.bar(
+        atendimentos_por_mes,
         x='Mês/Ano',
-        y='Número de Requisições',
-        title="Requisições por Mês",
-        labels={'Mês/Ano': '', 'Número de Requisições': ''},
+        y='Número de Atendimentos',
+        title="Número de Atendimentos por Mês",
+        labels={'Mês/Ano': 'Mês/Ano', 'Número de Atendimentos': 'Atendimentos'},
     )
-    fig_requisicoes.update_layout(showlegend=False, xaxis_title=None, yaxis_title=None, plot_bgcolor="#1e1e1e", paper_bgcolor="#1e1e1e")
-    fig_requisicoes.update_xaxes(showgrid=False, zeroline=False)
-    fig_requisicoes.update_yaxes(showgrid=False, zeroline=False)
-
-    # Exibir gráficos
-    st.plotly_chart(fig_incidentes)
-    st.plotly_chart(fig_requisicoes)
+    st.plotly_chart(fig)
 else:
     st.info("Selecione um técnico para exibir os dados.")
 
