@@ -41,11 +41,26 @@ df['Horas Decimais'] = df['Tempo em atendimento'].apply(time_to_hours)
 # Título do app
 st.title("Dashboard de Atendimento")
 
-# Definindo o estilo para as caixas de seleção e dropbox
-box_style = "background-color: #C1D8E3; padding: 15px; color: black; font-size: 16px; border-radius: 5px; margin-bottom: 10px;"
+# Estilizando o fundo e a cor do texto das caixas de seleção e data
+custom_style = """
+    <style>
+        .stSelectbox, .stDateInput, .stMultiselect, .stCheckbox, .stTextInput, .stTextArea {
+            background-color: #C1D8E3;
+            color: black;
+            padding: 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .stSelectbox select, .stDateInput input {
+            background-color: #C1D8E3;
+            color: black;
+        }
+    </style>
+"""
+st.markdown(custom_style, unsafe_allow_html=True)
 
 # Filtro de técnico
-st.write("<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>", unsafe_allow_html=True)
 tecnico = st.selectbox(
     "Selecionar Técnico:",
     options=[""] + sorted(df['Atribuído - Técnico'].dropna().unique()),
@@ -53,12 +68,8 @@ tecnico = st.selectbox(
     key="tecnico",
     help="Escolha o técnico para filtrar os dados",
 )
-st.write("</div>", unsafe_allow_html=True)
 
 # Filtro de intervalo de datas
-st.write("<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>", unsafe_allow_html=True)
-st.write("Selecionar Intervalo de Datas:")
-
 start_date = st.date_input(
     "Data de Início", 
     value=default_start_date, 
@@ -76,7 +87,6 @@ end_date = st.date_input(
     format="DD/MM/YYYY",
     key="end_date"
 )
-st.write("</div>", unsafe_allow_html=True)
 
 # Validar se as datas foram preenchidas corretamente
 if start_date and end_date and start_date > end_date:
@@ -101,12 +111,12 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
 
     # Exibir os tempos em atendimento com fundo cinza e texto em preto
     st.markdown(
-        f"<div style='{box_style}'>Tempo total em Incidentes: <b>{formatted_incidentes}</b></div>",
+        f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>Tempo total em Incidentes: <b>{formatted_incidentes}</b></div>",
         unsafe_allow_html=True
     )
 
     st.markdown(
-        f"<div style='{box_style}'>Tempo total em Requisições: <b>{formatted_requisicoes}</b></div>",
+        f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>Tempo total em Requisições: <b>{formatted_requisicoes}</b></div>",
         unsafe_allow_html=True
     )
 
@@ -134,3 +144,4 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     st.plotly_chart(fig)
 else:
     st.info("Selecione um técnico para exibir os dados.")
+
