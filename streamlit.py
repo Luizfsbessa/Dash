@@ -274,7 +274,6 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
 
 
 
-
 # Verifique se as variáveis 'incidentes_df' e 'requisicoes_df' estão definidas
 if 'incidentes_df' in locals() and isinstance(incidentes_df, pd.DataFrame) and \
    'requisicoes_df' in locals() and isinstance(requisicoes_df, pd.DataFrame):
@@ -326,6 +325,8 @@ if 'incidentes_df' in locals() and isinstance(incidentes_df, pd.DataFrame) and \
             st.plotly_chart(fig_requisicoes_pizza)
 
     else:
-        st.warning("Não há dados suficientes para exibir os gráficos. Verifique se o técnico foi selecionado corretamente.")
+        # Exibe uma mensagem quando não há dados para mostrar
+        st.info("Não há dados suficientes para exibir os gráficos. Verifique se o técnico foi selecionado corretamente.")
 else:
-    st.error("Erro: As variáveis 'incidentes_df' ou 'requisicoes_df' não estão definidas corretamente ou não são DataFrames.")
+    # Exibe uma mensagem caso as variáveis não estejam definidas corretamente
+    st.info("Por favor, selecione um técnico ou verifique se os dados foram carregados corretamente.")
