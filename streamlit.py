@@ -51,10 +51,15 @@ custom_style = """
             font-size: 16px;
             border-radius: 5px;
             margin-bottom: 10px;
+            border: 1px solid #A1C6D8;
         }
         .stSelectbox select, .stDateInput input {
             background-color: #C1D8E3;
             color: black;
+            border: 1px solid #A1C6D8;
+        }
+        .stSelectbox, .stDateInput {
+            font-size: 16px;
         }
     </style>
 """
