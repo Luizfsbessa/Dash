@@ -211,7 +211,10 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
 
 
     
-   # Gráficos de número de atendimentos por mês, separados por Tipo (Requisição e Incidente)
+  # Gráficos de número de atendimentos por mês, separados por Tipo (Requisição e Incidente)
+incidentes_df['Mês/Ano'] = incidentes_df['Data de Abertura'].dt.to_period('M')
+requisicoes_df['Mês/Ano'] = requisicoes_df['Data de Abertura'].dt.to_period('M')
+
 incidentes_por_mes = incidentes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
 requisicoes_por_mes = requisicoes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
 
@@ -271,6 +274,7 @@ if not requisicoes_por_mes.empty:
     )
 
     st.plotly_chart(fig_requisicoes)
+
 
 # Gráficos de Pizza - Distribuição de Incidentes e Requisições por Prioridade
 incidentes_por_prioridade = incidentes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
