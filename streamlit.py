@@ -9,6 +9,9 @@ df = pd.read_excel(file_path)
 # Certificar-se de que a coluna 'Data de abertura' está no formato datetime
 df['Data de abertura'] = pd.to_datetime(df['Data de abertura'], errors='coerce')
 
+# Adicionar a coluna 'Mês/Ano'
+df['Mês/Ano'] = df['Data de abertura'].dt.to_period('M').astype(str)
+
 # Determinar a data inicial padrão com base na base de dados
 min_date = df['Data de abertura'].min()
 if pd.notnull(min_date):
@@ -97,7 +100,6 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     )
 
     # Gráfico de número de atendimentos por mês
-    df['Mês/Ano'] = df['Data de abertura'].dt.to_period('M').astype(str)
     atendimentos_por_mes = filtered_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
 
     fig = px.bar(
