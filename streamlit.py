@@ -278,46 +278,37 @@ if not requisicoes_por_mes.empty:
 
 
 
-# Verificar se 'incidentes_df' e 'requisicoes_df' existem no ambiente e não estão vazios
-if 'incidentes_df' in locals() and incidentes_df is not None and not incidentes_df.empty:
+ # Gráficos de Pizza - Distribuição de Incidentes e Requisições por Prioridade
     incidentes_por_prioridade = incidentes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
-else:
-    st.error("O DataFrame 'incidentes_df' não foi carregado ou está vazio.")
-
-if 'requisicoes_df' in locals() and requisicoes_df is not None and not requisicoes_df.empty:
     requisicoes_por_prioridade = requisicoes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
-else:
-    st.error("O DataFrame 'requisicoes_df' não foi carregado ou está vazio.")
 
-# Definir cores personalizadas para cada prioridade
-prioridade_cores = {
-    'Baixa': '#90ACB8',
-    'Média': '#587D8E',
-    'Alta': '#C1D8E3',
-    'Muito Alta': '#2D55263'
-}
+    # Definir cores personalizadas para cada prioridade
+    prioridade_cores = {
+        'Baixa': '#90ACB8',
+        'Média': '#587D8E',
+        'Alta': '#C1D8E3',
+        'Muito Alta': '#2D55263'
+    }
 
-# Exibir gráfico de pizza para incidentes, se o DataFrame não estiver vazio
-if not incidentes_por_prioridade.empty:
-    fig_incidentes_pizza = px.pie(
-        incidentes_por_prioridade,
-        names='Prioridade',
-        values='Número de Atendimentos',
-        title="Distribuição de Incidentes por Prioridade",
-        color='Prioridade',
-        color_discrete_map=prioridade_cores
-    )
-    st.plotly_chart(fig_incidentes_pizza)
+    # Verificar se os DataFrames não estão vazios e exibir os gráficos de pizza
+    if not incidentes_por_prioridade.empty:
+        fig_incidentes_pizza = px.pie(
+            incidentes_por_prioridade,
+            names='Prioridade',
+            values='Número de Atendimentos',
+            title="Distribuição de Incidentes por Prioridade",
+            color='Prioridade',
+            color_discrete_map=prioridade_cores
+        )
+        st.plotly_chart(fig_incidentes_pizza)
 
-# Exibir gráfico de pizza para requisições, se o DataFrame não estiver vazio
-if not requisicoes_por_prioridade.empty:
-    fig_requisicoes_pizza = px.pie(
-        requisicoes_por_prioridade,
-        names='Prioridade',
-        values='Número de Atendimentos',
-        title="Distribuição de Requisições por Prioridade",
-        color='Prioridade',
-        color_discrete_map=prioridade_cores
-    )
-    st.plotly_chart(fig_requisicoes_pizza)
-
+    if not requisicoes_por_prioridade.empty:
+        fig_requisicoes_pizza = px.pie(
+            requisicoes_por_prioridade,
+            names='Prioridade',
+            values='Número de Atendimentos',
+            title="Distribuição de Requisições por Prioridade",
+            color='Prioridade',
+            color_discrete_map=prioridade_cores
+        )
+        st.plotly_chart(fig_requisicoes_pizza)
