@@ -275,8 +275,9 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
 
 
 
-# Verificar se as variáveis estão definidas e são DataFrames
-if isinstance(incidentes_df, pd.DataFrame) and isinstance(requisicoes_df, pd.DataFrame):
+# Verifique se as variáveis 'incidentes_df' e 'requisicoes_df' estão definidas
+if 'incidentes_df' in locals() and isinstance(incidentes_df, pd.DataFrame) and \
+   'requisicoes_df' in locals() and isinstance(requisicoes_df, pd.DataFrame):
     # Verificar se os DataFrames de incidentes e requisições contêm dados
     if not incidentes_df.empty and not requisicoes_df.empty:
         incidentes_por_prioridade = incidentes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
@@ -327,6 +328,4 @@ if isinstance(incidentes_df, pd.DataFrame) and isinstance(requisicoes_df, pd.Dat
     else:
         st.warning("Não há dados suficientes para exibir os gráficos. Verifique se o técnico foi selecionado corretamente.")
 else:
-    st.error("Erro: As variáveis 'incidentes_df' ou 'requisicoes_df' não estão definidas ou não são DataFrames.")
-
-
+    st.error("Erro: As variáveis 'incidentes_df' ou 'requisicoes_df' não estão definidas corretamente ou não são DataFrames.")
