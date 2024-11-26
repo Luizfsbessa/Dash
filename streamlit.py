@@ -142,9 +142,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-
-
-
 # Validar se as datas foram preenchidas corretamente
 if start_date and end_date and start_date > end_date:
     st.error("A data de início não pode ser maior que a data de fim.")
@@ -209,99 +206,119 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             unsafe_allow_html=True
         )
 
-      # Gráficos de número de atendimentos por mês, separados por Tipo (Requisição e Incidente)
-    incidentes_por_mes = incidentes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
-    requisicoes_por_mes = requisicoes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
+# Gráficos de número de atendimentos por mês, separados por Tipo (Requisição e Incidente)
+incidentes_por_mes = incidentes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
+requisicoes_por_mes = requisicoes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
 
-    # Verificar se os DataFrames não estão vazios e exibir os gráficos de barras
-    if not incidentes_por_mes.empty:
-        fig_incidentes = px.bar(
-            incidentes_por_mes,
-            x='Mês/Ano',
-            y='Número de Atendimentos',
-            text='Número de Atendimentos',
-            title="Número de Atendimentos por Mês - Incidentes",
-            color_discrete_sequence=['#1EA4B6']  # Cor para Incidentes
-        )
-        fig_incidentes.update_traces(texttemplate='<b>%{text}</b>', textposition='outside')
-        fig_incidentes.update_layout(
-            xaxis_title=None,
-            yaxis_title=None,
-            showlegend=False,
-            plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
-            paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
-            font=dict(color="black"),  # Cor do texto do gráfico
-        )
-        fig_incidentes.update_xaxes(showgrid=False)
-        fig_incidentes.update_yaxes(
-            showgrid=False,      # Opcional: remove a grade do eixo Y
-            zeroline=False,      # Opcional: remove a linha do eixo Y
-            showline=False,      # Opcional: remove a linha do gráfico
-            showticklabels=False  # Remove os valores do eixo Y
-        )
+# Verificar se os DataFrames não estão vazios e exibir os gráficos de barras
+if not incidentes_por_mes.empty:
+    fig_incidentes = px.bar(
+        incidentes_por_mes,
+        x='Mês/Ano',
+        y='Número de Atendimentos',
+        text='Número de Atendimentos',
+        title="Número de Atendimentos por Mês - Incidentes",
+        color_discrete_sequence=['#1EA4B6']  # Cor para Incidentes
+    )
+    fig_incidentes.update_traces(
+        texttemplate='<b>%{text}</b>',
+        textposition='outside',
+        textfont=dict(color='white')  # Cor do texto na barra (branco para contraste)
+    )
+    fig_incidentes.update_layout(
+        xaxis_title=None,
+        yaxis_title=None,
+        showlegend=False,
+        plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+        paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+        font=dict(color="white"),  # Cor do texto do gráfico no modo escuro
+    )
+    fig_incidentes.update_xaxes(showgrid=False)
+    fig_incidentes.update_yaxes(
+        showgrid=False,      # Opcional: remove a grade do eixo Y
+        zeroline=False,      # Opcional: remove a linha do eixo Y
+        showline=False,      # Opcional: remove a linha do gráfico
+        showticklabels=False  # Remove os valores do eixo Y
+    )
 
-        st.plotly_chart(fig_incidentes)
+    st.plotly_chart(fig_incidentes)
 
-    if not requisicoes_por_mes.empty:
-        fig_requisicoes = px.bar(
-            requisicoes_por_mes,
-            x='Mês/Ano',
-            y='Número de Atendimentos',
-            text='Número de Atendimentos',
-            title="Número de Atendimentos por Mês - Requisições",
-            color_discrete_sequence=['#00C6E0']  # Cor para Requisições
-        )
-        fig_requisicoes.update_traces(texttemplate='<b>%{text}</b>', textposition='outside')
-        fig_requisicoes.update_layout(
-            xaxis_title=None,
-            yaxis_title=None,
-            showlegend=False,
-            plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
-            paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
-            font=dict(color="black"),  # Cor do texto do gráfico
-        )
-        fig_requisicoes.update_xaxes(showgrid=False)
-        fig_requisicoes.update_yaxes(
-            showgrid=False,      # Opcional: remove a grade do eixo Y
-            zeroline=False,      # Opcional: remove a linha do eixo Y
-            showline=False,      # Opcional: remove a linha do gráfico
-            showticklabels=False  # Remove os valores do eixo Y
-        )
+if not requisicoes_por_mes.empty:
+    fig_requisicoes = px.bar(
+        requisicoes_por_mes,
+        x='Mês/Ano',
+        y='Número de Atendimentos',
+        text='Número de Atendimentos',
+        title="Número de Atendimentos por Mês - Requisições",
+        color_discrete_sequence=['#00C6E0']  # Cor para Requisições
+    )
+    fig_requisicoes.update_traces(
+        texttemplate='<b>%{text}</b>',
+        textposition='outside',
+        textfont=dict(color='white')  # Cor do texto na barra (branco para contraste)
+    )
+    fig_requisicoes.update_layout(
+        xaxis_title=None,
+        yaxis_title=None,
+        showlegend=False,
+        plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+        paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+        font=dict(color="white"),  # Cor do texto do gráfico no modo escuro
+    )
+    fig_requisicoes.update_xaxes(showgrid=False)
+    fig_requisicoes.update_yaxes(
+        showgrid=False,      # Opcional: remove a grade do eixo Y
+        zeroline=False,      # Opcional: remove a linha do eixo Y
+        showline=False,      # Opcional: remove a linha do gráfico
+        showticklabels=False  # Remove os valores do eixo Y
+    )
 
-        st.plotly_chart(fig_requisicoes)
+    st.plotly_chart(fig_requisicoes)
 
-    # Gráficos de Pizza - Distribuição de Incidentes e Requisições por Prioridade
-    incidentes_por_prioridade = incidentes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
-    requisicoes_por_prioridade = requisicoes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
+# Gráficos de Pizza - Distribuição de Incidentes e Requisições por Prioridade
+incidentes_por_prioridade = incidentes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
+requisicoes_por_prioridade = requisicoes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
 
-    # Definir cores personalizadas para cada prioridade
-    prioridade_cores = {
-        'Baixa': '#90ACB8',
-        'Média': '#587D8E',
-        'Alta': '#C1D8E3',
-        'Muito Alta': '#2D55263'
-    }
+# Definir cores personalizadas para cada prioridade
+prioridade_cores = {
+    'Baixa': '#90ACB8',
+    'Média': '#587D8E',
+    'Alta': '#C1D8E3',
+    'Muito Alta': '#2D55263'
+}
 
-    # Verificar se os DataFrames não estão vazios e exibir os gráficos de pizza
-    if not incidentes_por_prioridade.empty:
-        fig_incidentes_pizza = px.pie(
-            incidentes_por_prioridade,
-            names='Prioridade',
-            values='Número de Atendimentos',
-            title="Distribuição de Incidentes por Prioridade",
-            color='Prioridade',
-            color_discrete_map=prioridade_cores
-        )
-        st.plotly_chart(fig_incidentes_pizza)
+# Verificar se os DataFrames não estão vazios e exibir os gráficos de pizza
+if not incidentes_por_prioridade.empty:
+    fig_incidentes_pizza = px.pie(
+        incidentes_por_prioridade,
+        names='Prioridade',
+        values='Número de Atendimentos',
+        title="Distribuição de Incidentes por Prioridade",
+        color='Prioridade',
+        color_discrete_map=prioridade_cores
+    )
+    fig_incidentes_pizza.update_traces(textfont=dict(color='white'))  # Cor do texto no gráfico de pizza
+    fig_incidentes_pizza.update_layout(
+        plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+        paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+        font=dict(color="white"),  # Cor do texto do gráfico no modo escuro
+    )
+    st.plotly_chart(fig_incidentes_pizza)
 
-    if not requisicoes_por_prioridade.empty:
-        fig_requisicoes_pizza = px.pie(
-            requisicoes_por_prioridade,
-            names='Prioridade',
-            values='Número de Atendimentos',
-            title="Distribuição de Requisições por Prioridade",
-            color='Prioridade',
-            color_discrete_map=prioridade_cores
-        )
-        st.plotly_chart(fig_requisicoes_pizza)
+if not requisicoes_por_prioridade.empty:
+    fig_requisicoes_pizza = px.pie(
+        requisicoes_por_prioridade,
+        names='Prioridade',
+        values='Número de Atendimentos',
+        title="Distribuição de Requisições por Prioridade",
+        color='Prioridade',
+        color_discrete_map=prioridade_cores
+    )
+    fig_requisicoes_pizza.update_traces(textfont=dict(color='white'))  # Cor do texto no gráfico de pizza
+    fig_requisicoes_pizza.update_layout(
+        plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+        paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+        font=dict(color="white"),  # Cor do texto do gráfico no modo escuro
+    )
+    st.plotly_chart(fig_requisicoes_pizza)
 
