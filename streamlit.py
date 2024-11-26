@@ -224,10 +224,10 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
 
     # Definir cores personalizadas para cada prioridade
     prioridade_cores = {
-        'Baixa': '#E0AC69',
-        'Média': '#69B7E0',
-        'Alta': '#E0C569',
-        'Muito Alta': '#69E0CA'
+        'Baixa': '#6282B6',
+        'Média': '#62728B',
+        'Alta': '#548AE0',
+        'Muito Alta': '#545961'
     }
 
     # Verificar se os DataFrames não estão vazios e exibir os gráficos de pizza
