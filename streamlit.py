@@ -86,14 +86,14 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     formatted_incidentes = format_hours_to_hms(total_incidentes)
     formatted_requisicoes = format_hours_to_hms(total_requisicoes)
 
-    # Exibir os tempos em atendimento no mesmo estilo das dropdowns com cor preta
+    # Exibir os tempos em atendimento com caixa cinza e texto preto
     st.markdown(
-        f"<div style='color: black; font-size: 16px;'>Tempo total em Incidentes: <b>{formatted_incidentes}</b></div>",
+        f"<div style='background-color: #f5f5f5; padding: 10px; color: black; font-size: 16px; border-radius: 5px;'>Tempo total em Incidentes: <b>{formatted_incidentes}</b></div>",
         unsafe_allow_html=True
     )
 
     st.markdown(
-        f"<div style='color: black; font-size: 16px;'>Tempo total em Requisições: <b>{formatted_requisicoes}</b></div>",
+        f"<div style='background-color: #f5f5f5; padding: 10px; color: black; font-size: 16px; border-radius: 5px;'>Tempo total em Requisições: <b>{formatted_requisicoes}</b></div>",
         unsafe_allow_html=True
     )
 
@@ -121,4 +121,3 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     st.plotly_chart(fig)
 else:
     st.info("Selecione um técnico para exibir os dados.")
-
