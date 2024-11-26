@@ -270,37 +270,22 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
 
         st.plotly_chart(fig_requisicoes)
 
-    # Gráficos de Pizza - Distribuição de Incidentes e Requisições por Prioridade
+    
+
+
+
+
+# Gráficos de Pizza - Distribuição de Incidentes e Requisições por Prioridade
 incidentes_por_prioridade = incidentes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
 requisicoes_por_prioridade = requisicoes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
 
-# Verificar se 'Prioridade' existe no DataFrame
-if 'Prioridade' not in incidentes_df.columns:
-    st.error("A coluna 'Prioridade' não foi encontrada no DataFrame.")
-else:
-    # Realizar o groupby
-    incidentes_por_prioridade = incidentes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
-
-    # Definir cores personalizadas para cada prioridade
-    prioridade_cores = {
-        'Baixa': '#90ACB8',
-        'Média': '#587D8E',
-        'Alta': '#C1D8E3',
-        'Muito Alta': '#2D55263'
-    }
-
-    # Verificar se o DataFrame não está vazio e exibir o gráfico de pizza
-    if not incidentes_por_prioridade.empty:
-        fig_incidentes_pizza = px.pie(
-            incidentes_por_prioridade,
-            names='Prioridade',
-            values='Número de Atendimentos',
-            title="Distribuição de Incidentes por Prioridade",
-            color='Prioridade',
-            color_discrete_map=prioridade_cores
-        )
-        fig_incidentes_pizza.update_traces(texttemplate='<b>%{text}</b>', textinfo='percent+label')
-        st.plotly_chart(fig_incidentes_pizza)
+# Definir cores personalizadas para cada prioridade
+prioridade_cores = {
+    'Baixa': '#90ACB8',
+    'Média': '#587D8E',
+    'Alta': '#C1D8E3',
+    'Muito Alta': '#2D55263'
+}
 
 # Verificar se os DataFrames não estão vazios e exibir os gráficos de pizza
 if not incidentes_por_prioridade.empty:
@@ -314,8 +299,8 @@ if not incidentes_por_prioridade.empty:
     )
     # Colocar rótulo em negrito (sem afetar a porcentagem)
     fig_incidentes_pizza.update_traces(
-        texttemplate='<b>%{percent}</b>',
-        textinfo='percent'
+        texttemplate='%{label}: <b>%{percent}</b>',
+        textinfo='label+percent'
     )
     st.plotly_chart(fig_incidentes_pizza)
 
@@ -330,8 +315,7 @@ if not requisicoes_por_prioridade.empty:
     )
     # Colocar rótulo em negrito (sem afetar a porcentagem)
     fig_requisicoes_pizza.update_traces(
-        texttemplate='<b>%{percent}</b>',
-        textinfo='percent'
+        texttemplate='%{label}: <b>%{percent}</b>',
+        textinfo='label+percent'
     )
     st.plotly_chart(fig_requisicoes_pizza)
-
