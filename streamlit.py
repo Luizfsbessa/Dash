@@ -138,12 +138,9 @@ if total_requisicoes > 0:
         unsafe_allow_html=True
     )
 
-# Gráficos de número de atendimentos por mês, separados por Tipo (Requisição e Incidente)
-incidentes_por_mes = incidentes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
-requisicoes_por_mes = requisicoes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
-
-# Verificar se os DataFrames não estão vazios e exibir os gráficos
-if not incidentes_por_mes.empty:
+# Verificar se os dataframes não estão vazios antes de realizar o agrupamento
+if not incidentes_df.empty:
+    incidentes_por_mes = incidentes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
     fig_incidentes = px.bar(
         incidentes_por_mes,
         x='Mês/Ano',
@@ -167,7 +164,8 @@ if not incidentes_por_mes.empty:
     )
     st.plotly_chart(fig_incidentes)
 
-if not requisicoes_por_mes.empty:
+if not requisicoes_df.empty:
+    requisicoes_por_mes = requisicoes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
     fig_requisicoes = px.bar(
         requisicoes_por_mes,
         x='Mês/Ano',
@@ -207,13 +205,13 @@ with col1:
             title="Distribuição de Prioridades - Incidentes",
             color_discrete_sequence=px.colors.sequential.Teal,
         )
-        fig_pizza_incidentes.update_traces(textinfo='percent+label')  # Mostrar porcentagem e rótulos no gráfico
+        fig_pizza_incidentes.update_traces(textinfo='percent+label')  # Mostrar % e label
         fig_pizza_incidentes.update_layout(
-            showlegend=True, 
+            showlegend=True,
             legend_title_text="Prioridade",
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)', 
-            font=dict(color="black"),
+            plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+            paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+            font=dict(color="black"),  # Cor do texto
         )
         st.plotly_chart(fig_pizza_incidentes)
 
@@ -229,12 +227,12 @@ with col2:
             title="Distribuição de Prioridades - Requisições",
             color_discrete_sequence=px.colors.sequential.Teal,
         )
-        fig_pizza_requisicoes.update_traces(textinfo='percent+label')
+        fig_pizza_requisicoes.update_traces(textinfo='percent+label')  # Mostrar % e label
         fig_pizza_requisicoes.update_layout(
-            showlegend=True, 
+            showlegend=True,
             legend_title_text="Prioridade",
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)', 
-            font=dict(color="black"),
+            plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+            paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+            font=dict(color="black"),  # Cor do texto
         )
         st.plotly_chart(fig_pizza_requisicoes)
