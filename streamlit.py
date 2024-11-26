@@ -104,6 +104,15 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     if end_date:
         filtered_df = filtered_df[filtered_df['Data de abertura'] <= pd.to_datetime(end_date)]
 
+   # Verificar se o técnico foi selecionado
+if tecnico:  # Só filtrar e calcular se um técnico foi selecionado
+    # Filtragem de dados
+    filtered_df = df[df['Atribuído - Técnico'] == tecnico]
+    if start_date:
+        filtered_df = filtered_df[filtered_df['Data de abertura'] >= pd.to_datetime(start_date)]
+    if end_date:
+        filtered_df = filtered_df[filtered_df['Data de abertura'] <= pd.to_datetime(end_date)]
+
     # Calcular o total de horas por tipo
     incidentes_df = filtered_df[filtered_df['Tipo'] == 'Incidente']
     requisicoes_df = filtered_df[filtered_df['Tipo'] == 'Requisição']
@@ -113,6 +122,27 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
 
     formatted_incidentes = format_hours_to_hms(total_incidentes)
     formatted_requisicoes = format_hours_to_hms(total_requisicoes)
+
+    # Exibir os tempos em atendimento com fundo cinza e texto em preto
+    if total_incidentes > 0:
+        st.markdown(
+            f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>"
+            f"<b>Tempo total em Incidentes:</b> {formatted_incidentes}</div>",
+            unsafe_allow_html=True
+        )
+
+    if total_requisicoes > 0:
+        st.markdown(
+            f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>"
+            f"<b>Tempo total em Requisições:</b> {formatted_requisicoes}</div>",
+            unsafe_allow_html=True
+        )
+
+    # ... (continua com os gráficos e outras seções)
+
+else:
+    # Se o técnico não for selecionado, apenas exibe um aviso
+    st.info("Selecione um técnico para exibir os dados.")
 
    # Exibir os tempos em atendimento com informações detalhadas de prioridade
 if total_incidentes > 0:
