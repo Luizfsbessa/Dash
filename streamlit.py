@@ -36,7 +36,6 @@ def format_hours_to_hms(decimal_hours):
     s = int(((decimal_hours - h) * 60 - m) * 60)
     return f"{h:02}:{m:02}:{s:02}"
 
-# Criar a coluna 'Horas Decimais' convertendo 'Tempo em atendimento' para horas decimais
 df['Horas Decimais'] = df['Tempo em atendimento'].apply(time_to_hours)
 
 # Título do app
@@ -150,7 +149,10 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             paper_bgcolor='rgba(0,0,0,0)'
         )
         fig_incidentes.update_xaxes(showgrid=False)
-        fig_incidentes.update_yaxes(showgrid=False)
+        fig_incidentes.update_yaxes(
+            showgrid=False,      # Opcional: remove a grade do eixo Y
+            showticklabels=False # Remove os rótulos dos valores no eixo Y
+        )
         st.plotly_chart(fig_incidentes)
 
     if not requisicoes_por_mes.empty:
@@ -170,7 +172,10 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             paper_bgcolor='rgba(0,0,0,0)'
         )
         fig_requisicoes.update_xaxes(showgrid=False)
-        fig_requisicoes.update_yaxes(showgrid=False)
+        fig_requisicoes.update_yaxes(
+            showgrid=False,      # Opcional: remove a grade do eixo Y
+            showticklabels=False # Remove os rótulos dos valores no eixo Y
+        )
         st.plotly_chart(fig_requisicoes)
 else:
     st.info("Selecione um técnico para exibir os dados.")
