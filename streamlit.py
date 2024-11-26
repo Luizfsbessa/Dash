@@ -104,86 +104,37 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     if end_date:
         filtered_df = filtered_df[filtered_df['Data de abertura'] <= pd.to_datetime(end_date)]
 
-    # Calcular o total de horas por tipo
+    # Dados de incidentes e requisições
     incidentes_df = filtered_df[filtered_df['Tipo'] == 'Incidente']
     requisicoes_df = filtered_df[filtered_df['Tipo'] == 'Requisição']
 
-    total_incidentes = incidentes_df['Horas Decimais'].sum()
-    total_requisicoes = requisicoes_df['Horas Decimais'].sum()
+    # Cálculo de tempos médios, máximos e totais por prioridade
+    def calcular_tempo_prioridade(df):
+        prioridades = df['Prioridade'].unique()
+        resultados = []
+        for prioridade in prioridades:
+            subset = df[df['Prioridade'] == prioridade]
+            media = subset['Horas Decimais'].mean()
+            maxima = subset['Horas Decimais'].max()
+            resultados.append({
+                "Prioridade": prioridade,
+                "Média": format_hours_to_hms(media),
+                "Máxima": format_hours_to_hms(maxima)
+            })
+        return pd.DataFrame(resultados)
 
-    formatted_incidentes = format_hours_to_hms(total_incidentes)
-    formatted_requisicoes = format_hours_to_hms(total_requisicoes)
+    tempos_incidentes = calcular_tempo_prioridade(incidentes_df)
+    tempos_requisicoes = calcular_tempo_prioridade(requisicoes_df)
 
-    # Exibir os tempos em atendimento com fundo cinza e texto em preto
-    if total_incidentes > 0:
-        st.markdown(
-            f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>"
-            f"<b>Tempo total em Incidentes:</b> {formatted_incidentes}</div>",
-            unsafe_allow_html=True
-        )
+    # Markdown para incidentes
+    st.markdown("### Detalhes de Incidentes por Prioridade")
+    st.markdown(tempos_incidentes.to_markdown(index=False))
 
-    if total_requisicoes > 0:
-        st.markdown(
-            f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>"
-            f"<b>Tempo total em Requisições:</b> {formatted_requisicoes}</div>",
-            unsafe_allow_html=True
-        )
+    # Markdown para requisições
+    st.markdown("### Detalhes de Requisições por Prioridade")
+    st.markdown(tempos_requisicoes.to_markdown(index=False))
 
-    # Gráficos de número de atendimentos por mês, separados por Tipo (Requisição e Incidente)
-    incidentes_por_mes = incidentes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
-    requisicoes_por_mes = requisicoes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
-
-    # Verificar se os DataFrames não estão vazios e exibir os gráficos
-    if not incidentes_por_mes.empty:
-        fig_incidentes = px.bar(
-            incidentes_por_mes,
-            x='Mês/Ano',
-            y='Número de Atendimentos',
-            text='Número de Atendimentos',
-            title="Número de Atendimentos por Mês - Incidentes",
-        )
-        fig_incidentes.update_traces(texttemplate='<b>%{text}</b>', textposition='outside')
-        fig_incidentes.update_layout(
-            xaxis_title=None,
-            yaxis_title=None,
-            showlegend=False,
-            plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
-            paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
-            font=dict(color="black"),  # Cor do texto do gráfico
-        )
-        fig_incidentes.update_xaxes(showgrid=False)
-        fig_incidentes.update_yaxes(
-            showgrid=False,      # Opcional: remove a grade do eixo Y
-            showticklabels=False # Remove os rótulos dos valores no eixo Y
-        )
-        st.plotly_chart(fig_incidentes)
-
-    if not requisicoes_por_mes.empty:
-        fig_requisicoes = px.bar(
-            requisicoes_por_mes,
-            x='Mês/Ano',
-            y='Número de Atendimentos',
-            text='Número de Atendimentos',
-            title="Número de Atendimentos por Mês - Requisições",
-        )
-        fig_requisicoes.update_traces(texttemplate='<b>%{text}</b>', textposition='outside')
-        fig_requisicoes.update_layout(
-            xaxis_title=None,
-            yaxis_title=None,
-            showlegend=False,
-            plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
-            paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
-            font=dict(color="black"),  # Cor do texto do gráfico
-        )
-        fig_requisicoes.update_xaxes(showgrid=False)
-        fig_requisicoes.update_yaxes(
-            showgrid=False,      # Opcional: remove a grade do eixo Y
-            showticklabels=False # Remove os rótulos dos valores no eixo Y
-        )
-        st.plotly_chart(fig_requisicoes)
-
-    # Gráfico de Pizza para "Prioridade" - Segregado por Tipo (Incidente e Requisição)
-    # Criar duas colunas para exibir os gráficos lado a lado
+    # Gráficos de Pizza para "Prioridade" - Segregado por Tipo (Incidente e Requisição)
     col1, col2 = st.columns(2)
 
     with col1:
@@ -198,17 +149,8 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
                 title="Distribuição de Prioridades - Incidentes",
                 color_discrete_sequence=px.colors.sequential.Teal,
             )
-            fig_pizza_incidentes.update_traces(textinfo='percent+label')  # Mostrar porcentagem e rótulos no gráfico
-            fig_pizza_incidentes.update_layout(
-                showlegend=True, 
-                legend_title_text="Prioridade",
-                font=dict(color="black"),  # Cor do texto
-                plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
-                paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
-            )
+            fig_pizza_incidentes.update_traces(textinfo='percent+label')
             st.plotly_chart(fig_pizza_incidentes)
-        else:
-            st.warning("Não há dados de Prioridade para Incidentes.")
 
     with col2:
         if not requisicoes_df.empty and 'Prioridade' in requisicoes_df.columns:
@@ -222,59 +164,8 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
                 title="Distribuição de Prioridades - Requisições",
                 color_discrete_sequence=px.colors.sequential.Teal,
             )
-            fig_pizza_requisicoes.update_traces(textinfo='percent+label')  # Mostrar porcentagem e rótulos no gráfico
-            fig_pizza_requisicoes.update_layout(
-                showlegend=True, 
-                legend_title_text="Prioridade",
-                font=dict(color="black"),  # Cor do texto
-                plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
-                paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
-            )
+            fig_pizza_requisicoes.update_traces(textinfo='percent+label')
             st.plotly_chart(fig_pizza_requisicoes)
-        else:
-            st.warning("Não há dados de Prioridade para Requisições.")
 
 else:
     st.info("Selecione um técnico para exibir os dados.")
-# Dados simulados (substitua pelo seu DataFrame)
-dados = {
-    "Prioridade": ["Baixa", "Média", "Alta", "Muito Alta"],
-    "Média (Horas)": [3.75, 2.5, 1.25, 0.75],  # Em horas decimais
-    "Máximo (Horas)": [7.5, 4, 2.75, 1.5]  # Em horas decimais
-}
-
-# Criar DataFrame
-df_prioridade = pd.DataFrame(dados)
-
-# Formatar as horas em HH:MM:SS
-def format_hours_to_hms(decimal_hours):
-    h = int(decimal_hours)
-    m = int((decimal_hours - h) * 60)
-    s = int(((decimal_hours - h) * 60 - m) * 60)
-    return f"{h:02}:{m:02}:{s:02}"
-
-df_prioridade["Média Formatada"] = df_prioridade["Média (Horas)"].apply(format_hours_to_hms)
-df_prioridade["Máximo Formatado"] = df_prioridade["Máximo (Horas)"].apply(format_hours_to_hms)
-
-# Markdown para introdução
-st.markdown("### Perfil de Incidentes por Prioridade")
-for i, row in df_prioridade.iterrows():
-    st.markdown(f"- **Prioridade {row['Prioridade']}**: Média de Atendimento - `{row['Média Formatada']}`")
-
-# Gráfico de Barras
-fig = px.bar(
-    df_prioridade,
-    x="Prioridade",
-    y="Média (Horas)",
-    title="Média de Atendimento por Prioridade",
-    labels={"Média (Horas)": "Média de Atendimento (Horas)", "Prioridade": "Prioridade"},
-    color="Prioridade",
-    text=df_prioridade["Média Formatada"],
-    color_discrete_sequence=px.colors.sequential.Teal
-)
-fig.update_traces(textposition="outside")
-st.plotly_chart(fig)
-
-# Tabela Interativa
-st.markdown("### Detalhes por Prioridade")
-st.dataframe(df_prioridade[["Prioridade", "Média Formatada", "Máximo Formatado"]], use_container_width=True)
