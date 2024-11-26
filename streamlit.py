@@ -61,6 +61,11 @@ custom_style = """
         .stSelectbox, .stDateInput {
             font-size: 16px;
         }
+        /* Estilo específico para a parte interna do Selectbox (onde o técnico é exibido) */
+        .stSelectbox div[data-baseweb="select"] {
+            background-color: #C1D8E3;  /* Cor de fundo da seleção */
+            color: black;  /* Cor do texto da seleção */
+        }
     </style>
 """
 st.markdown(custom_style, unsafe_allow_html=True)
@@ -149,4 +154,3 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     st.plotly_chart(fig)
 else:
     st.info("Selecione um técnico para exibir os dados.")
-
