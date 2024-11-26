@@ -95,6 +95,15 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# Filtro de técnico
+tecnico = st.selectbox(
+    "Selecionar Técnico:",
+    options=[""] + sorted(df['Atribuído - Técnico'].dropna().unique()),
+    format_func=lambda x: "Selecione um técnico" if x == "" else x,
+    key="tecnico",
+    help="Escolha o técnico para filtrar os dados",
+)
+
 # Filtro de intervalo de datas
 start_date = st.date_input(
     "Data de Início", 
@@ -115,6 +124,33 @@ end_date = st.date_input(
     key="end_date",  
     help="Escolha a data final para o filtrar os dados",
 )
+
+# Estilo para garantir visibilidade no modo claro e escuro
+st.markdown("""
+    <style>
+    /* Ajuste do texto e fundo dos componentes para modo claro e escuro */
+    .stSelectbox, .stDateInput, .stTextInput {
+        color: var(--secondary-text-color) !important;  /* Cor do texto ajustada automaticamente */
+        background-color: var(--background-color) !important;  /* Fundo adaptável ao tema */
+        border: 1px solid var(--border-color) !important;  /* Cor da borda ajustada */
+    }
+    .stSelectbox select, .stDateInput input, .stTextInput input {
+        color: var(--text-color) !important;
+        background-color: var(--background-color) !important;  /* Fundo adaptável */
+    }
+
+    /* Ajuste do placeholder */
+    .stTextInput input::placeholder, .stDateInput input::placeholder {
+        color: var(--secondary-text-color) !important;  /* Ajuste automático no placeholder */
+    }
+
+    /* Melhorando a visibilidade de seleções */
+    .stSelectbox select:focus, .stDateInput input:focus {
+        border-color: var(--primary-color) !important;  /* Cor da borda ao focar */
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 
 
 # Validar se as datas foram preenchidas corretamente
