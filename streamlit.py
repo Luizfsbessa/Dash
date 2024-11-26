@@ -44,9 +44,6 @@ st.title("Dashboard de Atendimento")
 # Estilizando o fundo e a cor do texto das caixas de seleção e data
 custom_style = """
     <style>
-        body {
-            background-color: white;
-        }
         .stSelectbox, .stDateInput, .stMultiselect, .stCheckbox, .stTextInput, .stTextArea {
             background-color: white;
             color: black;
@@ -96,100 +93,144 @@ end_date = st.date_input(
     key="end_date"
 )
 
-# Inicializar as variáveis com 0
-total_incidentes = 0
-total_requisicoes = 0
-
 # Validar se as datas foram preenchidas corretamente
 if start_date and end_date and start_date > end_date:
     st.error("A data de início não pode ser maior que a data de fim.")
-else:
-    # Inicializar as variáveis incidentes_df e requisicoes_df como dataframes vazios
-    incidentes_df = pd.DataFrame()
-    requisicoes_df = pd.DataFrame()
+elif tecnico:  # Só filtrar se o técnico foi selecionado
+    # Filtragem de dados
+    filtered_df = df[df['Atribuído - Técnico'] == tecnico]
+    if start_date:
+        filtered_df = filtered_df[filtered_df['Data de abertura'] >= pd.to_datetime(start_date)]
+    if end_date:
+        filtered_df = filtered_df[filtered_df['Data de abertura'] <= pd.to_datetime(end_date)]
 
-    if tecnico:  # Só filtrar e calcular se um técnico foi selecionado
-        # Filtragem de dados
-        filtered_df = df[df['Atribuído - Técnico'] == tecnico]
-        if start_date:
-            filtered_df = filtered_df[filtered_df['Data de abertura'] >= pd.to_datetime(start_date)]
-        if end_date:
-            filtered_df = filtered_df[filtered_df['Data de abertura'] <= pd.to_datetime(end_date)]
+    # Calcular o total de horas por tipo
+    incidentes_df = filtered_df[filtered_df['Tipo'] == 'Incidente']
+    requisicoes_df = filtered_df[filtered_df['Tipo'] == 'Requisição']
 
-        # Verificar se há incidentes e requisições
-        incidentes_df = filtered_df[filtered_df['Tipo'] == 'Incidente']
-        requisicoes_df = filtered_df[filtered_df['Tipo'] == 'Requisição']
+    total_incidentes = incidentes_df['Horas Decimais'].sum()
+    total_requisicoes = requisicoes_df['Horas Decimais'].sum()
 
-        # Calcular o total de horas por tipo, apenas se os dataframes não estiverem vazios
-        total_incidentes = incidentes_df['Horas Decimais'].sum() if not incidentes_df.empty else 0
-        total_requisicoes = requisicoes_df['Horas Decimais'].sum() if not requisicoes_df.empty else 0
+    formatted_incidentes = format_hours_to_hms(total_incidentes)
+    formatted_requisicoes = format_hours_to_hms(total_requisicoes)
 
-# Formatar os totais
-formatted_incidentes = format_hours_to_hms(total_incidentes)
-formatted_requisicoes = format_hours_to_hms(total_requisicoes)
+    # Exibir os tempos em atendimento com fundo cinza e texto em preto
+    if total_incidentes > 0:
+        st.markdown(
+            f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>"
+            f"<b>Tempo total em Incidentes:</b> {formatted_incidentes}</div>",
+            unsafe_allow_html=True
+        )
 
-# Exibir os tempos em atendimento com fundo cinza e texto em preto
-if total_incidentes > 0:
-    st.markdown(
-        f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>"
-        f"<b>Tempo total em Incidentes:</b> {formatted_incidentes}</div>",
-        unsafe_allow_html=True
-    )
+    if total_requisicoes > 0:
+        st.markdown(
+            f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>"
+            f"<b>Tempo total em Requisições:</b> {formatted_requisicoes}</div>",
+            unsafe_allow_html=True
+        )
 
-if total_requisicoes > 0:
-    st.markdown(
-        f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>"
-        f"<b>Tempo total em Requisições:</b> {formatted_requisicoes}</div>",
-        unsafe_allow_html=True
-    )
+    # Exibir os tempos em atendimento com informações detalhadas de prioridade
+    if total_incidentes > 0:
+        # Cálculo de tempos médios por prioridade em Incidentes
+        tempos_incidentes = incidentes_df.groupby('Prioridade')['Horas Decimais'].agg(['mean', 'max']).reset_index()
+        tempos_incidentes['Média'] = tempos_incidentes['mean'].apply(format_hours_to_hms)
+        tempos_incidentes['Máximo'] = tempos_incidentes['max'].apply(format_hours_to_hms)
 
-# Verificar se os dataframes não estão vazios antes de realizar o agrupamento
-if not incidentes_df.empty:
+        # Gerar o texto com os detalhes
+        incidentes_detalhes = "".join([  
+            f"<li><b>{row['Prioridade']}:</b> Média: {row['Média']} | Máximo: {row['Máximo']}</li>"
+            for _, row in tempos_incidentes.iterrows()
+        ])
+
+        st.markdown(
+            f"""
+            <div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>
+                <b>Tempo total em Incidentes:</b> {formatted_incidentes}
+                <ul>
+                    {incidentes_detalhes}
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    if total_requisicoes > 0:
+        # Cálculo de tempos médios por prioridade em Requisições
+        tempos_requisicoes = requisicoes_df.groupby('Prioridade')['Horas Decimais'].agg(['mean', 'max']).reset_index()
+        tempos_requisicoes['Média'] = tempos_requisicoes['mean'].apply(format_hours_to_hms)
+        tempos_requisicoes['Máximo'] = tempos_requisicoes['max'].apply(format_hours_to_hms)
+
+        # Gerar o texto com os detalhes
+        requisicoes_detalhes = "".join([  
+            f"<li><b>{row['Prioridade']}:</b> Média: {row['Média']} | Máximo: {row['Máximo']}</li>"
+            for _, row in tempos_requisicoes.iterrows()
+        ])
+
+        st.markdown(
+            f"""
+            <div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>
+                <b>Tempo total em Requisições:</b> {formatted_requisicoes}
+                <ul>
+                    {requisicoes_detalhes}
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    # Gráficos de número de atendimentos por mês, separados por Tipo (Requisição e Incidente)
     incidentes_por_mes = incidentes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
-    fig_incidentes = px.bar(
-        incidentes_por_mes,
-        x='Mês/Ano',
-        y='Número de Atendimentos',
-        text='Número de Atendimentos',
-        title="Número de Atendimentos por Mês - Incidentes",
-    )
-    fig_incidentes.update_traces(texttemplate='<b>%{text}</b>', textposition='outside')
-    fig_incidentes.update_layout(
-        xaxis_title=None,
-        yaxis_title=None,
-        showlegend=False,
-        plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
-        paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
-        font=dict(color="black"),  # Cor do texto do gráfico
-    )
-    fig_incidentes.update_xaxes(showgrid=False)
-    fig_incidentes.update_yaxes(
-        showgrid=False,      # Opcional: remove a grade do eixo Y
-        showticklabels=False # Remove os rótulos dos valores no eixo Y
-    )
-    st.plotly_chart(fig_incidentes)
-
-if not requisicoes_df.empty:
     requisicoes_por_mes = requisicoes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
-    fig_requisicoes = px.bar(
-        requisicoes_por_mes,
-        x='Mês/Ano',
-        y='Número de Atendimentos',
-        text='Número de Atendimentos',
-        title="Número de Atendimentos por Mês - Requisições",
-    )
-    fig_requisicoes.update_traces(texttemplate='<b>%{text}</b>', textposition='outside')
-    fig_requisicoes.update_layout(
-        xaxis_title=None,
-        yaxis_title=None,
-        showlegend=False,
-        plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
-        paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
-        font=dict(color="black"),  # Cor do texto do gráfico
-    )
-    fig_requisicoes.update_xaxes(showgrid=False)
-    fig_requisicoes.update_yaxes(
-        showgrid=False,      # Opcional: remove a grade do eixo Y
-        showticklabels=False # Remove os rótulos dos valores no eixo Y
-    )
-    st.plotly_chart(fig_requisicoes)
+
+    # Verificar se os DataFrames não estão vazios e exibir os gráficos
+    if not incidentes_por_mes.empty:
+        fig_incidentes = px.bar(
+            incidentes_por_mes,
+            x='Mês/Ano',
+            y='Número de Atendimentos',
+            text='Número de Atendimentos',
+            title="Número de Atendimentos por Mês - Incidentes",
+        )
+        fig_incidentes.update_traces(texttemplate='<b>%{text}</b>', textposition='outside')
+        fig_incidentes.update_layout(
+            xaxis_title=None,
+            yaxis_title=None,
+            showlegend=False,
+            plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+            paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+            font=dict(color="black"),  # Cor do texto do gráfico
+        )
+        fig_incidentes.update_xaxes(showgrid=False)
+        fig_incidentes.update_yaxes(
+            showgrid=False,      # Opcional: remove a grade do eixo Y
+            zeroline=False,      # Opcional: remove a linha do eixo Y
+            showline=False       # Opcional: remove a linha do gráfico
+        )
+
+        st.plotly_chart(fig_incidentes)
+
+    if not requisicoes_por_mes.empty:
+        fig_requisicoes = px.bar(
+            requisicoes_por_mes,
+            x='Mês/Ano',
+            y='Número de Atendimentos',
+            text='Número de Atendimentos',
+            title="Número de Atendimentos por Mês - Requisições",
+        )
+        fig_requisicoes.update_traces(texttemplate='<b>%{text}</b>', textposition='outside')
+        fig_requisicoes.update_layout(
+            xaxis_title=None,
+            yaxis_title=None,
+            showlegend=False,
+            plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+            paper_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+            font=dict(color="black"),  # Cor do texto do gráfico
+        )
+        fig_requisicoes.update_xaxes(showgrid=False)
+        fig_requisicoes.update_yaxes(
+            showgrid=False,      # Opcional: remove a grade do eixo Y
+            zeroline=False,      # Opcional: remove a linha do eixo Y
+            showline=False       # Opcional: remove a linha do gráfico
+        )
+
+        st.plotly_chart(fig_requisicoes)
