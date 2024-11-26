@@ -82,6 +82,7 @@ start_date = st.date_input(
     max_value=max_date, 
     format="DD/MM/YYYY",
     key="start_date"
+    help="Escolha a data inicial para o filtar os dados",
 )
 
 end_date = st.date_input(
@@ -91,6 +92,7 @@ end_date = st.date_input(
     max_value=max_date, 
     format="DD/MM/YYYY",
     key="end_date"
+    help="Escolha a data final para o filtar os dados",
 )
 
 # Validar se as datas foram preenchidas corretamente
