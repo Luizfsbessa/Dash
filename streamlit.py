@@ -45,7 +45,7 @@ st.title("Dashboard de Atendimento")
 custom_style = """
     <style>
         .stSelectbox, .stDateInput, .stMultiselect, .stCheckbox, .stTextInput, .stTextArea {
-            background-color: #C1D8E3;
+            background-color: white;
             color: black;
             padding: 15px;
             font-size: 16px;
@@ -54,17 +54,12 @@ custom_style = """
             border: 1px solid #A1C6D8;
         }
         .stSelectbox select, .stDateInput input {
-            background-color: #C1D8E3;
+            background-color: white;
             color: black;
             border: 1px solid #A1C6D8;
         }
         .stSelectbox, .stDateInput {
             font-size: 16px;
-        }
-        /* Estilo específico para a parte interna do Selectbox (onde o técnico é exibido) */
-        .stSelectbox div[data-baseweb="select"] {
-            background-color: #C1D8E3;  /* Cor de fundo da seleção */
-            color: black;  /* Cor do texto da seleção */
         }
     </style>
 """
@@ -120,37 +115,61 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     formatted_requisicoes = format_hours_to_hms(total_requisicoes)
 
     # Exibir os tempos em atendimento com fundo cinza e texto em preto
-    st.markdown(
-        f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>Tempo total em Incidentes: <b>{formatted_incidentes}</b></div>",
-        unsafe_allow_html=True
-    )
+    if total_incidentes > 0:
+        st.markdown(
+            f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>Tempo total em Incidentes: <b>{formatted_incidentes}</b></div>",
+            unsafe_allow_html=True
+        )
 
-    st.markdown(
-        f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>Tempo total em Requisições: <b>{formatted_requisicoes}</b></div>",
-        unsafe_allow_html=True
-    )
+    if total_requisicoes > 0:
+        st.markdown(
+            f"<div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>Tempo total em Requisições: <b>{formatted_requisicoes}</b></div>",
+            unsafe_allow_html=True
+        )
 
-    # Gráfico de número de atendimentos por mês com rótulos
-    atendimentos_por_mes = filtered_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
+    # Gráficos de número de atendimentos por mês, separados por Tipo (Requisição e Incidente)
+    incidentes_por_mes = incidentes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
+    requisicoes_por_mes = requisicoes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
 
-    fig = px.bar(
-        atendimentos_por_mes,
-        x='Mês/Ano',
-        y='Número de Atendimentos',
-        text='Número de Atendimentos',
-        title="Número de Atendimentos por Mês",
-    )
-    fig.update_traces(texttemplate='<b>%{text}</b>', textposition='outside')
-    fig.update_layout(
-        xaxis_title=None,
-        yaxis_title=None,
-        showlegend=False,
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)'
-    )
-    fig.update_xaxes(showgrid=False)
-    fig.update_yaxes(showgrid=False)
+    if not incidentes_por_mes.empty:
+        fig_incidentes = px.bar(
+            incidentes_por_mes,
+            x='Mês/Ano',
+            y='Número de Atendimentos',
+            text='Número de Atendimentos',
+            title="Número de Atendimentos por Mês - Incidentes",
+        )
+        fig_incidentes.update_traces(texttemplate='<b>%{text}</b>', textposition='outside')
+        fig_incidentes.update_layout(
+            xaxis_title=None,
+            yaxis_title=None,
+            showlegend=False,
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)'
+        )
+        fig_incidentes.update_xaxes(showgrid=False)
+        fig_incidentes.update_yaxes(showgrid=False)
+        st.plotly_chart(fig_incidentes)
 
-    st.plotly_chart(fig)
+    if not requisicoes_por_mes.empty:
+        fig_requisicoes = px.bar(
+            requisicoes_por_mes,
+            x='Mês/Ano',
+            y='Número de Atendimentos',
+            text='Número de Atendimentos',
+            title="Número de Atendimentos por Mês - Requisições",
+        )
+        fig_requisicoes.update_traces(texttemplate='<b>%{text}</b>', textposition='outside')
+        fig_requisicoes.update_layout(
+            xaxis_title=None,
+            yaxis_title=None,
+            showlegend=False,
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)'
+        )
+        fig_requisicoes.update_xaxes(showgrid=False)
+        fig_requisicoes.update_yaxes(showgrid=False)
+        st.plotly_chart(fig_requisicoes)
 else:
     st.info("Selecione um técnico para exibir os dados.")
+
