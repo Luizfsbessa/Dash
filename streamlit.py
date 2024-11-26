@@ -297,10 +297,10 @@ if not incidentes_por_prioridade.empty:
         color='Prioridade',
         color_discrete_map=prioridade_cores
     )
-    # Colocar rótulo em negrito (sem afetar a porcentagem)
+    # Atualizar rótulo para negrito e mostrar a porcentagem e o rótulo
     fig_incidentes_pizza.update_traces(
-        texttemplate='%{label}: <b>%{percent}</b>',
-        textinfo='label+percent'
+        texttemplate='<b>%{percent:.1f}%</b><br>%{label}',  # Porcentagem em negrito
+        textinfo='percent+label'
     )
     st.plotly_chart(fig_incidentes_pizza)
 
@@ -313,9 +313,10 @@ if not requisicoes_por_prioridade.empty:
         color='Prioridade',
         color_discrete_map=prioridade_cores
     )
-    # Colocar rótulo em negrito (sem afetar a porcentagem)
+    # Atualizar rótulo para negrito e mostrar a porcentagem e o rótulo
     fig_requisicoes_pizza.update_traces(
-        texttemplate='%{label}: <b>%{percent}</b>',
-        textinfo='label+percent'
+        texttemplate='<b>%{percent:.1f}%</b><br>%{label}',  # Porcentagem em negrito
+        textinfo='percent+label'
     )
     st.plotly_chart(fig_requisicoes_pizza)
+
