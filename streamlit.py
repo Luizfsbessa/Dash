@@ -40,6 +40,8 @@ df['Horas Decimais'] = df['Tempo em atendimento'].apply(time_to_hours)
 
 # Título do app
 st.title("Dashboard de Atendimento")
+# Centralizar o título do app
+st.markdown("<h1 style='text-align: center;'>Dashboard de Atendimento</h1>", unsafe_allow_html=True)
 
 # Estilizando o fundo e a cor do texto das caixas de seleção e data
 custom_style = """
