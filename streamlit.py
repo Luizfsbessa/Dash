@@ -9,7 +9,7 @@ df = pd.read_excel(file_path)
 # Certificar-se de que a coluna 'Data de abertura' está no formato datetime
 df['Data de abertura'] = pd.to_datetime(df['Data de abertura'], errors='coerce')
 
-# Adicionar a coluna 'Mês/Ano'
+# Adicionar a coluna 'Mês/Ano' apenas com mês e ano
 df['Mês/Ano'] = df['Data de abertura'].dt.to_period('M').astype(str)
 
 # Determinar a data inicial padrão com base na base de dados
@@ -131,6 +131,7 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     incidentes_por_mes = incidentes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
     requisicoes_por_mes = requisicoes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
 
+    # Verificar se os DataFrames não estão vazios e exibir os gráficos
     if not incidentes_por_mes.empty:
         fig_incidentes = px.bar(
             incidentes_por_mes,
@@ -172,4 +173,3 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
         st.plotly_chart(fig_requisicoes)
 else:
     st.info("Selecione um técnico para exibir os dados.")
-
