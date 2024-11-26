@@ -134,6 +134,7 @@ elif tecnico:
 
     # Gráfico de número de atendimentos por mês (Requisições)
     requisicoes_por_mes = requisicoes_df.groupby('Período').size().reset_index(name='Atendimentos')
+    st.write("Debug Requisições:", requisicoes_por_mes)  # Debug adicional
     if not requisicoes_por_mes.empty:
         fig_requisicoes = px.bar(
             requisicoes_por_mes,
@@ -150,6 +151,7 @@ elif tecnico:
 
     # Gráfico de número de atendimentos por mês (Incidentes)
     incidentes_por_mes = incidentes_df.groupby('Período').size().reset_index(name='Atendimentos')
+    st.write("Debug Incidentes:", incidentes_por_mes)  # Debug adicional
     if not incidentes_por_mes.empty:
         fig_incidentes = px.bar(
             incidentes_por_mes,
@@ -166,4 +168,3 @@ elif tecnico:
 
 else:
     st.info("Selecione um técnico para exibir os dados.")
-
