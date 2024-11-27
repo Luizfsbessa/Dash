@@ -95,56 +95,6 @@ end_date = st.date_input(
     help="Escolha a data final para o filtrar os dados",
 )
 
-# Estilo para garantir que o texto fique visível no modo escuro
-st.markdown("""
-    <style>
-    .streamlit-expanderHeader {
-        color: white !important;
-    }
-    .stTextInput, .stDateInput, .stSelectbox, .stRadio {
-        color: white !important;
-        background-color: #333333 !important;  /* Fundo escuro */
-        border: 1px solid #5e5e5e !important;  /* Cor de borda clara */
-    }
-    .stTextInput input, .stDateInput input, .stSelectbox select {
-        color: white !important;
-        background-color: #333333 !important;  /* Fundo escuro no campo */
-    }
-    .stTextInput input::placeholder {
-        color: #aaaaaa !important;  /* Cor do texto do placeholder */
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-# Estilo para garantir visibilidade no modo claro e escuro
-st.markdown("""
-    <style>
-    /* Ajuste do texto e fundo dos componentes para modo claro e escuro */
-    .stSelectbox, .stDateInput, .stTextInput {
-        color: var(--secondary-text-color) !important;  /* Cor do texto ajustada automaticamente */
-        background-color: var(--background-color) !important;  /* Fundo adaptável ao tema */
-        border: 1px solid var(--border-color) !important;  /* Cor da borda ajustada */
-    }
-    .stSelectbox select, .stDateInput input, .stTextInput input {
-        color: var(--text-color) !important;
-        background-color: var(--background-color) !important;  /* Fundo adaptável */
-    }
-
-    /* Ajuste do placeholder */
-    .stTextInput input::placeholder, .stDateInput input::placeholder {
-        color: var(--secondary-text-color) !important;  /* Ajuste automático no placeholder */
-    }
-
-    /* Melhorando a visibilidade de seleções */
-    .stSelectbox select:focus, .stDateInput input:focus {
-        border-color: var(--primary-color) !important;  /* Cor da borda ao focar */
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-
-
-
 # Validar se as datas foram preenchidas corretamente
 if start_date and end_date and start_date > end_date:
     st.error("A data de início não pode ser maior que a data de fim.")
@@ -161,27 +111,27 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     requisicoes_df = filtered_df[filtered_df['Tipo'] == 'Requisição']
 
     # Exibir os tempos em atendimento com informações detalhadas de prioridade
-   if not incidentes_df.empty:
-    # Cálculo de tempos médios por prioridade em Incidentes
-    tempos_incidentes = incidentes_df.groupby('Prioridade')['Horas Decimais'].agg(['mean', 'max']).reset_index()
-    tempos_incidentes['Média'] = tempos_incidentes['mean'].apply(format_hours_to_hms)
-    tempos_incidentes['Máximo'] = tempos_incidentes['max'].apply(format_hours_to_hms)
+    if not incidentes_df.empty:
+        # Cálculo de tempos médios por prioridade em Incidentes
+        tempos_incidentes = incidentes_df.groupby('Prioridade')['Horas Decimais'].agg(['mean', 'max']).reset_index()
+        tempos_incidentes['Média'] = tempos_incidentes['mean'].apply(format_hours_to_hms)
+        tempos_incidentes['Máximo'] = tempos_incidentes['max'].apply(format_hours_to_hms)
 
-    # Gerar o texto com os detalhes
-    incidentes_detalhes = "".join([  
-        f"<p><b>Prioridade {row['Prioridade']}:</b> Média: {row['Média']} | Máximo: {row['Máximo']}</p>"
-        for _, row in tempos_incidentes.iterrows()
-    ])
+        # Gerar o texto com os detalhes
+        incidentes_detalhes = "".join([  
+            f"<p><b>Prioridade {row['Prioridade']}:</b> Média: {row['Média']} | Máximo: {row['Máximo']}</p>"
+            for _, row in tempos_incidentes.iterrows()
+        ])
 
-    st.markdown(
-        f"""
-        <div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>
-            {incidentes_detalhes}
-            <p><b>Tempo total em Incidentes:</b> {format_hours_to_hms(incidentes_df['Horas Decimais'].sum())}</p>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+        st.markdown(
+            f"""
+            <div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>
+                {incidentes_detalhes}
+                <p><b>Tempo total em Incidentes:</b> {format_hours_to_hms(incidentes_df['Horas Decimais'].sum())}</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     if not requisicoes_df.empty:
         # Cálculo de tempos médios por prioridade em Requisições
@@ -191,22 +141,22 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
 
         # Gerar o texto com os detalhes
         requisicoes_detalhes = "".join([  
-            f"<li><b>{row['Prioridade']}:</b> Média: {row['Média']} | Máximo: {row['Máximo']}</li>"
+            f"<p><b>Prioridade {row['Prioridade']}:</b> Média: {row['Média']} | Máximo: {row['Máximo']}</p>"
             for _, row in tempos_requisicoes.iterrows()
         ])
 
         st.markdown(
             f"""
             <div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>
-                <b>Tempo total em Requisições:</b> {format_hours_to_hms(requisicoes_df['Horas Decimais'].sum())}
-                <ul>
-                    {requisicoes_detalhes}
-                </ul>
+                {requisicoes_detalhes}
+                <p><b>Tempo total em Requisições:</b> {format_hours_to_hms(requisicoes_df['Horas Decimais'].sum())}</p>
             </div>
             """,
             unsafe_allow_html=True
         )
 
+
+    
       # Gráficos de número de atendimentos por mês, separados por Tipo (Requisição e Incidente)
     incidentes_por_mes = incidentes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
     requisicoes_por_mes = requisicoes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
