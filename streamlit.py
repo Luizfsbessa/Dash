@@ -119,49 +119,63 @@ if 'Data de abertura' in df.columns and 'Horas Decimais' in df.columns:
         incidentes_df = filtered_df[filtered_df['Tipo'] == 'Incidente']
         requisicoes_df = filtered_df[filtered_df['Tipo'] == 'Requisição']
 
-        # Exibir tempos totais em incidentes com detalhes
-        if not incidentes_df.empty:
-            tempos_incidentes = incidentes_df.groupby('Prioridade')['Horas Decimais'].agg(['mean', 'max']).reset_index()
-            tempos_incidentes['Média'] = tempos_incidentes['mean'].apply(format_hours_to_hms)
-            tempos_incidentes['Máximo'] = tempos_incidentes['max'].apply(format_hours_to_hms)
+        # Definir a ordem das prioridades
+prioridade_ordem = ['baixa', 'média', 'alta', 'muito alta']
 
-            incidentes_detalhes = "".join([  
-                f"<p><b>Prioridade {row['Prioridade']}:</b> Média: {row['Média']} | Máximo: {row['Máximo']}</p>"
-                for _, row in tempos_incidentes.iterrows()
-            ])
+# Exibir tempos totais em incidentes com detalhes
+if not incidentes_df.empty:
+    tempos_incidentes = incidentes_df.groupby('Prioridade')['Horas Decimais'].agg(['mean', 'max']).reset_index()
 
-            st.markdown(
-                f"""
-                <div style='background-color: #C1D8E3; padding: 20px; border-radius: 10px; margin-bottom: 20px;'>
-                    <h2 style='text-align: center; color: #1E4C67;'>Tempo total em Incidentes:</h2>
-                    <h1 style='text-align: center; color: #103D52; font-size: 1.1em; font-weight: bold;'>{format_hours_to_hms(incidentes_df['Horas Decimais'].sum())}</h1>
-                    {incidentes_detalhes}
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+    # Reorganizar as prioridades conforme a ordem desejada
+    tempos_incidentes['Prioridade'] = pd.Categorical(tempos_incidentes['Prioridade'], categories=prioridade_ordem, ordered=True)
+    tempos_incidentes = tempos_incidentes.sort_values('Prioridade')
 
-        # Exibir tempos totais em requisições com detalhes
-        if not requisicoes_df.empty:
-            tempos_requisicoes = requisicoes_df.groupby('Prioridade')['Horas Decimais'].agg(['mean', 'max']).reset_index()
-            tempos_requisicoes['Média'] = tempos_requisicoes['mean'].apply(format_hours_to_hms)
-            tempos_requisicoes['Máximo'] = tempos_requisicoes['max'].apply(format_hours_to_hms)
+    tempos_incidentes['Média'] = tempos_incidentes['mean'].apply(format_hours_to_hms)
+    tempos_incidentes['Máximo'] = tempos_incidentes['max'].apply(format_hours_to_hms)
 
-            requisicoes_detalhes = "".join([  
-                f"<p><b>Prioridade {row['Prioridade']}:</b> Média: {row['Média']} | Máximo: {row['Máximo']}</p>"
-                for _, row in tempos_requisicoes.iterrows()
-            ])
+    incidentes_detalhes = "".join([  
+        f"<p><b>Prioridade {row['Prioridade']}:</b> Média: {row['Média']} | Máximo: {row['Máximo']}</p>"
+        for _, row in tempos_incidentes.iterrows()
+    ])
 
-            st.markdown(
-                f"""
-                <div style='background-color: #C1D8E3; padding: 30px; border-radius: 20px; margin-bottom: 30px;'>
-                    <h2 style='text-align: center; color: #1E4C67;'>Tempo total em Requisições:</h2>
-                    <h1 style='text-align: center; color: #103D52; font-size: 1.1em; font-weight: bold;'>{format_hours_to_hms(requisicoes_df['Horas Decimais'].sum())}</h1>
-                    {requisicoes_detalhes}
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+    st.markdown(
+        f"""
+        <div style='background-color: #C1D8E3; padding: 20px; border-radius: 10px; margin-bottom: 20px;'>
+            <h2 style='text-align: center; color: #1E4C67;'>Tempo total em Incidentes:</h2>
+            <h1 style='text-align: center; color: #103D52; font-size: 1.2em; font-weight: bold;'>{format_hours_to_hms(incidentes_df['Horas Decimais'].sum())}</h1>
+            {incidentes_detalhes}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+# Exibir tempos totais em requisições com detalhes
+if not requisicoes_df.empty:
+    tempos_requisicoes = requisicoes_df.groupby('Prioridade')['Horas Decimais'].agg(['mean', 'max']).reset_index()
+
+    # Reorganizar as prioridades conforme a ordem desejada
+    tempos_requisicoes['Prioridade'] = pd.Categorical(tempos_requisicoes['Prioridade'], categories=prioridade_ordem, ordered=True)
+    tempos_requisicoes = tempos_requisicoes.sort_values('Prioridade')
+
+    tempos_requisicoes['Média'] = tempos_requisicoes['mean'].apply(format_hours_to_hms)
+    tempos_requisicoes['Máximo'] = tempos_requisicoes['max'].apply(format_hours_to_hms)
+
+    requisicoes_detalhes = "".join([  
+        f"<p><b>Prioridade {row['Prioridade']}:</b> Média: {row['Média']} | Máximo: {row['Máximo']}</p>"
+        for _, row in tempos_requisicoes.iterrows()
+    ])
+
+    st.markdown(
+        f"""
+        <div style='background-color: #C1D8E3; padding: 20px; border-radius: 10px; margin-bottom: 20px;'>
+            <h2 style='text-align: center; color: #1E4C67;'>Tempo total em Requisições:</h2>
+            <h1 style='text-align: center; color: #103D52; font-size: 1.2em; font-weight: bold;'>{format_hours_to_hms(requisicoes_df['Horas Decimais'].sum())}</h1>
+            {requisicoes_detalhes}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
 
         # **Novo código de gráficos de barras** - Gráficos de número de atendimentos por mês, separados por Tipo (Requisição e Incidente)
         # Calcular número de atendimentos por mês para Incidentes
