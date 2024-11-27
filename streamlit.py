@@ -154,7 +154,7 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
         </div>
         """,
         unsafe_allow_html=True
-
+       )
 
     
       # Gráficos de número de atendimentos por mês, separados por Tipo (Requisição e Incidente)
