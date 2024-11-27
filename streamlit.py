@@ -291,6 +291,7 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             title="Distribuição de Incidentes por Prioridade",
             color='Prioridade',
             color_discrete_map=prioridade_cores
+            textinfo='value'
         )
         st.plotly_chart(fig_incidentes_pizza)
 
@@ -302,5 +303,6 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             title="Distribuição de Requisições por Prioridade",
             color='Prioridade',
             color_discrete_map=prioridade_cores
+            textinfo='value'
         )
         st.plotly_chart(fig_requisicoes_pizza)
