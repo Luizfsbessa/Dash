@@ -14,7 +14,7 @@ if not os.path.exists(repo_dir):
     repo_url_with_token = repo_url.replace("https://", f"https://{token}@")
     Repo.clone_from(repo_url_with_token, repo_dir)
 
-# Acessar o repositório clonado (sem fazer pull)
+# Acessar o repositório clonado (não tentamos fazer 'git pull')
 repo = Repo(repo_dir)
 
 # Carregar o arquivo Excel do repositório clonado
@@ -113,8 +113,6 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
         filtered_df = filtered_df[filtered_df['Data de abertura'] >= pd.to_datetime(start_date)]
     if end_date:
         filtered_df = filtered_df[filtered_df['Data de abertura'] <= pd.to_datetime(end_date)]
-
-
 
 
 
