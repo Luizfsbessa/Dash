@@ -3,6 +3,20 @@ import pandas as pd
 import plotly.express as px
 import git
 import os
+import shutil
+
+# Verifique se o repositório já existe
+if os.path.exists(repo_dir):
+    shutil.rmtree(repo_dir)  # Deleta o repositório existente
+
+# Clona novamente o repositório
+try:
+    repo = git.Repo.clone_from(f"https://{token}@github.com/Luizfsbessa/Dash.git", repo_dir)
+    st.success("Repositório clonado com sucesso.")
+except git.exc.GitCommandError as e:
+    st.error(f"Erro ao clonar o repositório: {e}")
+    st.write(e.stderr)  # Exibe o erro detalhado
+
 
 # Definir o repositório e o token
 repo_url = "https://github.com/Luizfsbessa/Dash"
