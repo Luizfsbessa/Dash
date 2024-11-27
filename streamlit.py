@@ -283,26 +283,25 @@ prioridade_cores = {
 }
 
 # Verificar se os DataFrames não estão vazios e exibir os gráficos de pizza
-f not incidentes_por_prioridade.empty:
-    fig_incidentes_pizza = px.pie(
-        incidentes_por_prioridade,
-        names='Prioridade',
-        values='Número de Atendimentos',
-        title="Distribuição de Incidentes por Prioridade",
-        color='Prioridade',
-        color_discrete_map=prioridade_cores,
-        textinfo='value'  # Exibe os valores em vez das porcentagens
-    )
-    st.plotly_chart(fig_incidentes_pizza)
+    if not incidentes_por_prioridade.empty:
+        fig_incidentes_pizza = px.pie(
+            incidentes_por_prioridade,
+            names='Prioridade',
+            values='Número de Atendimentos',
+            title="Distribuição de Incidentes por Prioridade",
+            color='Prioridade',
+            color_discrete_map=prioridade_cores
+        )
+        st.plotly_chart(fig_incidentes_pizza)
 
-if not requisicoes_por_prioridade.empty:
-    fig_requisicoes_pizza = px.pie(
-        requisicoes_por_prioridade,
-        names='Prioridade',
-        values='Número de Atendimentos',
-        title="Distribuição de Requisições por Prioridade",
-        color='Prioridade',
-        color_discrete_map=prioridade_cores,
-        textinfo='value'  # Exibe os valores em vez das porcentagens
-    )
-    st.plotly_chart(fig_requisicoes_pizza)
+    if not requisicoes_por_prioridade.empty:
+        fig_requisicoes_pizza = px.pie(
+            requisicoes_por_prioridade,
+            names='Prioridade',
+            values='Número de Atendimentos',
+            title="Distribuição de Requisições por Prioridade",
+            color='Prioridade',
+            color_discrete_map=prioridade_cores
+        )
+        st.plotly_chart(fig_requisicoes_pizza)
+
