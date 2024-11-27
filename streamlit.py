@@ -283,7 +283,7 @@ prioridade_cores = {
 }
 
 # Verificar se os DataFrames não estão vazios e exibir os gráficos de pizza
-if not incidentes_por_prioridade.empty:
+f not incidentes_por_prioridade.empty:
     fig_incidentes_pizza = px.pie(
         incidentes_por_prioridade,
         names='Prioridade',
