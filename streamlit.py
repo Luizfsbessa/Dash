@@ -4,27 +4,20 @@ import plotly.express as px
 from git import Repo
 import os
 
-# Configurações do GitHub
-repo_url = "https://github.com/Luizfsbessa/Dash.git"
-token = "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"  # Coloque seu token aqui
-repo_dir = "repositorio_dash"  # Pasta local onde o repositório será clonado
-
-# Verificar import os
-import pandas as pd
-import streamlit as st
-from git import Repo
-
 # URL do repositório com token de autenticação
 repo_url = "https://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@github.com/Luizfsbessa/Dash.git"
-repo_dir = "repositorio_dash"
+repo_dir = "repositorio_dash"  # Pasta local onde o repositório será clonado
 
 # Verifica se o repositório já foi clonado; se não, faz o clone
 if not os.path.exists(repo_dir):
     Repo.clone_from(repo_url, repo_dir)
 else:
-    # Se já existe, faz o pull para atualizar
-    repo = Repo(repo_dir)
-    repo.git.pull('origin', 'main')
+    try:
+        # Se já existe, faz o pull para atualizar
+        repo = Repo(repo_dir)
+        repo.git.pull('origin', 'main')  # Atualiza o repositório local com as últimas mudanças
+    except Exception as e:
+        st.error(f"Ocorreu um erro ao tentar atualizar o repositório: {e}")
 
 # Carregar o arquivo Excel do repositório clonado
 file_path = os.path.join(repo_dir, "backtest.xlsx")
@@ -57,6 +50,7 @@ def time_to_hours(time_str):
         return 0
 
 df['Horas Decimais'] = df['Tempo em atendimento'].apply(time_to_hours)
+
 
 # Título do app
 st.title("Dashboard de Atendimento")
