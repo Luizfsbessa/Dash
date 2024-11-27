@@ -291,7 +291,7 @@ if not incidentes_por_prioridade.empty:
         title="Distribuição de Incidentes por Prioridade",
         color='Prioridade',
         color_discrete_map=prioridade_cores,
-        textinfo='value'
+        textinfo='label+value'
     )
     st.plotly_chart(fig_incidentes_pizza)
 
@@ -303,6 +303,6 @@ if not requisicoes_por_prioridade.empty:
         title="Distribuição de Requisições por Prioridade",
         color='Prioridade',
         color_discrete_map=prioridade_cores,
-        textinfo='value' 
+        textinfo='label+value' 
     )
     st.plotly_chart(fig_requisicoes_pizza)
