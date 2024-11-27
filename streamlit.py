@@ -11,13 +11,11 @@ repo_dir = "repositorio_dash"  # Pasta local onde o repositório será clonado
 
 # Verificar se o repositório já existe, caso contrário, clonar
 if not os.path.exists(repo_dir):
-    # Criar a URL com o token de autenticação
     repo_url_with_token = repo_url.replace("https://", f"https://{token}@")
     Repo.clone_from(repo_url_with_token, repo_dir)
 
-# Acessar o repositório clonado
+# Acessar o repositório clonado (sem fazer pull)
 repo = Repo(repo_dir)
-repo.git.pull('origin', 'main')  # Atualiza o repositório local com as últimas mudanças
 
 # Carregar o arquivo Excel do repositório clonado
 file_path = os.path.join(repo_dir, "backtest.xlsx")
@@ -45,13 +43,6 @@ def time_to_hours(time_str):
         return h + m / 60 + s / 3600
     except ValueError:
         return 0
-
-# Formatar horas decimais no formato 6680:02:58
-def format_hours_to_hms(decimal_hours):
-    h = int(decimal_hours)
-    m = int((decimal_hours - h) * 60)
-    s = int(((decimal_hours - h) * 60 - m) * 60)
-    return f"{h:02}:{m:02}:{s:02}"
 
 df['Horas Decimais'] = df['Tempo em atendimento'].apply(time_to_hours)
 
@@ -122,6 +113,7 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
         filtered_df = filtered_df[filtered_df['Data de abertura'] >= pd.to_datetime(start_date)]
     if end_date:
         filtered_df = filtered_df[filtered_df['Data de abertura'] <= pd.to_datetime(end_date)]
+
 
 
 
