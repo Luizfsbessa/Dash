@@ -167,19 +167,37 @@ else:
     )
     st.plotly_chart(fig_requisicoes)
 
-    # Gráfico de pizza de prioridades
-    if not df.empty:
-        prioridade_counts = df['Prioridade'].value_counts()
-        fig_pizza = px.pie(
-            names=prioridade_counts.index,
-            values=prioridade_counts.values,
-            title="Distribuição das Prioridades",
-            color=prioridade_counts.index,
-            color_discrete_map={
-                'Baixa': '#90ACB8',
-                'Média': '#587D8E',
-                'Alta': '#C1D8E3',
-                'Muito Alta': '#2D5526'
-            }
+    # Gráficos de Pizza - Distribuição de Incidentes e Requisições por Prioridade
+    incidentes_por_prioridade = incidentes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
+    requisicoes_por_prioridade = requisicoes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
+
+    # Definir cores personalizadas para cada prioridade
+    prioridade_cores = {
+        'Baixa': '#90ACB8',
+        'Média': '#587D8E',
+        'Alta': '#C1D8E3',
+        'Muito Alta': '#2D55263'
+    }
+
+    # Verificar se os DataFrames não estão vazios e exibir os gráficos de pizza
+    if not incidentes_por_prioridade.empty:
+        fig_incidentes_pizza = px.pie(
+            incidentes_por_prioridade,
+            names='Prioridade',
+            values='Número de Atendimentos',
+            title="Distribuição de Incidentes por Prioridade",
+            color='Prioridade',
+            color_discrete_map=prioridade_cores
         )
-        st.plotly_chart(fig_pizza)
+        st.plotly_chart(fig_incidentes_pizza)
+
+    if not requisicoes_por_prioridade.empty:
+        fig_requisicoes_pizza = px.pie(
+            requisicoes_por_prioridade,
+            names='Prioridade',
+            values='Número de Atendimentos',
+            title="Distribuição de Requisições por Prioridade",
+            color='Prioridade',
+            color_discrete_map=prioridade_cores
+        )
+        st.plotly_chart(fig_requisicoes_pizza)
