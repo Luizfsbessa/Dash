@@ -95,44 +95,52 @@ end_date = st.date_input(
     help="Escolha a data final para o filtrar os dados",
 )
 
-# Validar se as datas foram preenchidas corretamente
-if start_date and end_date and start_date > end_date:
-    st.error("A data de início não pode ser maior que a data de fim.")
-elif tecnico:  # Só filtrar se o técnico foi selecionado
-    # Filtragem de dados
-    filtered_df = df[df['Atribuído - Técnico'] == tecnico]
-    if start_date:
-        filtered_df = filtered_df[filtered_df['Data de abertura'] >= pd.to_datetime(start_date)]
-    if end_date:
-        filtered_df = filtered_df[filtered_df['Data de abertura'] <= pd.to_datetime(end_date)]
+# Validar e converter datas
+if start_date and end_date:
+    start_date = pd.to_datetime(start_date)
+    end_date = pd.to_datetime(end_date)
+    if start_date > end_date:
+        st.error("A data de início não pode ser maior que a data de fim.")
 
-    # Calcular o total de horas por tipo
-    incidentes_df = filtered_df[filtered_df['Tipo'] == 'Incidente']
-    requisicoes_df = filtered_df[filtered_df['Tipo'] == 'Requisição']
+# Verificar colunas necessárias
+if 'Data de abertura' in df.columns and 'Horas Decimais' in df.columns:
+    df['Data de abertura'] = pd.to_datetime(df['Data de abertura'], errors='coerce')
+    df['Horas Decimais'] = pd.to_numeric(df['Horas Decimais'], errors='coerce')
 
-    # Exibir os tempos em atendimento com informações detalhadas de prioridade
-    if not incidentes_df.empty:
-        # Cálculo de tempos médios por prioridade em Incidentes
-        tempos_incidentes = incidentes_df.groupby('Prioridade')['Horas Decimais'].agg(['mean', 'max']).reset_index()
-        tempos_incidentes['Média'] = tempos_incidentes['mean'].apply(format_hours_to_hms)
-        tempos_incidentes['Máximo'] = tempos_incidentes['max'].apply(format_hours_to_hms)
+    # Filtrar dados por técnico e datas
+    if tecnico:  # Só filtrar se o técnico foi selecionado
+        filtered_df = df[df['Atribuído - Técnico'] == tecnico]
+        if start_date:
+            filtered_df = filtered_df[filtered_df['Data de abertura'] >= start_date]
+        if end_date:
+            filtered_df = filtered_df[filtered_df['Data de abertura'] <= end_date]
 
-        # Gerar o texto com os detalhes
-        incidentes_detalhes = "".join([  
-            f"<p><b>Prioridade {row['Prioridade']}:</b> Média: {row['Média']} | Máximo: {row['Máximo']}</p>"
-            for _, row in tempos_incidentes.iterrows()
-        ])
+        # Calcular o total de horas por tipo
+        incidentes_df = filtered_df[filtered_df['Tipo'] == 'Incidente']
 
-        # Exibir tempos totais em incidentes com centralização e destaque
-          st.markdown(
-            f"""
-            <div style='background-color: #C1D8E3; padding: 20px; border-radius: 10px; margin-bottom: 20px;'>
-                <h2 style='text-align: center; color: #1E4C67;'>Tempo total em Incidentes:</h2>
-                <h1 style='text-align: center; color: #103D52; font-size: 2.5em; font-weight: bold;'>{format_hours_to_hms(incidentes_df['Horas Decimais'].sum())}</h1>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        # Exibir tempos totais em incidentes com detalhes
+        if not incidentes_df.empty:
+            tempos_incidentes = incidentes_df.groupby('Prioridade')['Horas Decimais'].agg(['mean', 'max']).reset_index()
+            tempos_incidentes['Média'] = tempos_incidentes['mean'].apply(format_hours_to_hms)
+            tempos_incidentes['Máximo'] = tempos_incidentes['max'].apply(format_hours_to_hms)
+
+            incidentes_detalhes = "".join([  
+                f"<p><b>Prioridade {row['Prioridade']}:</b> Média: {row['Média']} | Máximo: {row['Máximo']}</p>"
+                for _, row in tempos_incidentes.iterrows()
+            ])
+
+            st.markdown(
+                f"""
+                <div style='background-color: #C1D8E3; padding: 20px; border-radius: 10px; margin-bottom: 20px;'>
+                    <h2 style='text-align: center; color: #1E4C67;'>Tempo total em Incidentes:</h2>
+                    <h1 style='text-align: center; color: #103D52; font-size: 2.5em; font-weight: bold;'>{format_hours_to_hms(incidentes_df['Horas Decimais'].sum())}</h1>
+                    {incidentes_detalhes}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+else:
+    st.error("As colunas necessárias ('Data de abertura' ou 'Horas Decimais') não estão presentes no DataFrame.")
 
 if not requisicoes_df.empty:
     # Cálculo de tempos médios por prioridade em Requisições
