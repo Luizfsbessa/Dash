@@ -203,5 +203,5 @@ if 'Data de abertura' in df.columns and 'Horas Decimais' in df.columns:
             )
             st.plotly_chart(fig_requisicoes)
 
-else:
-    st.error("Colunas necessárias não encontradas no arquivo.")
+    else:
+        st.error("Colunas necessárias não encontradas no arquivo.")
