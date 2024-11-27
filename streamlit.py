@@ -161,29 +161,27 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
     requisicoes_df = filtered_df[filtered_df['Tipo'] == 'Requisição']
 
     # Exibir os tempos em atendimento com informações detalhadas de prioridade
-    if not incidentes_df.empty:
-        # Cálculo de tempos médios por prioridade em Incidentes
-        tempos_incidentes = incidentes_df.groupby('Prioridade')['Horas Decimais'].agg(['mean', 'max']).reset_index()
-        tempos_incidentes['Média'] = tempos_incidentes['mean'].apply(format_hours_to_hms)
-        tempos_incidentes['Máximo'] = tempos_incidentes['max'].apply(format_hours_to_hms)
+   if not incidentes_df.empty:
+    # Cálculo de tempos médios por prioridade em Incidentes
+    tempos_incidentes = incidentes_df.groupby('Prioridade')['Horas Decimais'].agg(['mean', 'max']).reset_index()
+    tempos_incidentes['Média'] = tempos_incidentes['mean'].apply(format_hours_to_hms)
+    tempos_incidentes['Máximo'] = tempos_incidentes['max'].apply(format_hours_to_hms)
 
-        # Gerar o texto com os detalhes
-        incidentes_detalhes = "".join([  
-            f"<li><b>{row['Prioridade']}:</b> Média: {row['Média']} | Máximo: {row['Máximo']}</li>"
-            for _, row in tempos_incidentes.iterrows()
-        ])
+    # Gerar o texto com os detalhes
+    incidentes_detalhes = "".join([  
+        f"<p><b>Prioridade {row['Prioridade']}:</b> Média: {row['Média']} | Máximo: {row['Máximo']}</p>"
+        for _, row in tempos_incidentes.iterrows()
+    ])
 
-        st.markdown(
-            f"""
-            <div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>
-                <b>Tempo total em Incidentes:</b> {format_hours_to_hms(incidentes_df['Horas Decimais'].sum())}
-                <ul>
-                    {incidentes_detalhes}
-                </ul>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+    st.markdown(
+        f"""
+        <div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>
+            {incidentes_detalhes}
+            <p><b>Tempo total em Incidentes:</b> {format_hours_to_hms(incidentes_df['Horas Decimais'].sum())}</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     if not requisicoes_df.empty:
         # Cálculo de tempos médios por prioridade em Requisições
