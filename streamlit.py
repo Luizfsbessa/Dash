@@ -24,143 +24,110 @@ def exibir_total_tempo(titulo, total, tempos_detalhes):
 # Exemplo de DataFrames de incidentes e requisições
 incidentes_df = pd.DataFrame({
     'Horas Decimais': [1.5, 2.0, 1.2, 3.5, 4.0],
-    'Prioridade': ['Alta', 'Média', 'Baixa', 'Alta', 'Média']
+    'Prioridade': ['Alta', 'Média', 'Baixa', 'Alta', 'Média'],
+    'Mês/Ano': ['Jan/2024', 'Fev/2024', 'Mar/2024', 'Abr/2024', 'Mai/2024']
 })
 
 requisicoes_df = pd.DataFrame({
     'Horas Decimais': [0.5, 1.0, 2.5, 1.5, 1.0],
-    'Prioridade': ['Baixa', 'Média', 'Alta', 'Alta', 'Baixa']
+    'Prioridade': ['Baixa', 'Média', 'Alta', 'Alta', 'Baixa'],
+    'Mês/Ano': ['Jan/2024', 'Fev/2024', 'Mar/2024', 'Abr/2024', 'Mai/2024']
 })
 
-# Cálculo do total de tempo
-total_incidentes = incidentes_df['Horas Decimais'].sum()
-total_requisicoes = requisicoes_df['Horas Decimais'].sum()
+# Menu de seleção para escolher os dados (Incidentes ou Requisições)
+selecao_dados = st.selectbox("Escolha os dados", ["Incidentes", "Requisições"])
 
-# Detalhamento de tempos médio e máximo por prioridade
-tempos_incidentes = pd.DataFrame({
-    'Prioridade': ['Alta', 'Média', 'Baixa'],
-    'Média': [1.8, 2.1, 1.0],
-    'Máximo': [3.5, 2.5, 1.5]
-})
+# Selecione a prioridade
+selecao_prioridade = st.selectbox("Selecione a Prioridade", ["Todas", "Alta", "Média", "Baixa"])
 
-tempos_requisicoes = pd.DataFrame({
-    'Prioridade': ['Alta', 'Média', 'Baixa'],
-    'Média': [1.2, 1.5, 1.0],
-    'Máximo': [2.5, 2.0, 1.5]
-})
+# Selecione o período (meses)
+selecao_periodo = st.selectbox("Selecione o Período", ["Todos", "Jan/2024", "Fev/2024", "Mar/2024", "Abr/2024", "Mai/2024"])
 
-# Detalhes dos tempos médios e máximos para inserir na caixa
-incidentes_detalhes = "".join([  
-    f"<li><b>{row['Prioridade']}:</b> Média: {row['Média']} | Máximo: {row['Máximo']}</li>"
-    for _, row in tempos_incidentes.iterrows()
-])
+# Função para calcular os totais de tempo, baseado na seleção do usuário
+def calcular_totais(df, tipo, prioridade, periodo):
+    if tipo == "Incidentes":
+        df_filtrado = incidentes_df
+    else:
+        df_filtrado = requisicoes_df
 
-requisicoes_detalhes = "".join([  
-    f"<li><b>{row['Prioridade']}:</b> Média: {row['Média']} | Máximo: {row['Máximo']}</li>"
-    for _, row in tempos_requisicoes.iterrows()
-])
+    # Filtrando por prioridade
+    if prioridade != "Todas":
+        df_filtrado = df_filtrado[df_filtrado['Prioridade'] == prioridade]
+
+    # Filtrando por período
+    if periodo != "Todos":
+        df_filtrado = df_filtrado[df_filtrado['Mês/Ano'] == periodo]
+
+    # Cálculo do tempo total
+    total_tempo = df_filtrado['Horas Decimais'].sum()
+    return total_tempo, df_filtrado
+
+# Calculando os totais de tempo
+total_tempo, df_filtrado = calcular_totais(None, selecao_dados, selecao_prioridade, selecao_periodo)
+
+# Detalhando os tempos médios e máximos por prioridade
+tempos_medio_maximo = df_filtrado.groupby('Prioridade').agg(
+    Média=('Horas Decimais', 'mean'),
+    Máximo=('Horas Decimais', 'max')
+).reset_index()
 
 # Exibindo os totais de tempo
-st.markdown(exibir_total_tempo("Tempo total em Incidentes", total_incidentes, incidentes_detalhes), unsafe_allow_html=True)
-st.markdown(exibir_total_tempo("Tempo total em Requisições", total_requisicoes, requisicoes_detalhes), unsafe_allow_html=True)
+detalhes_tempo = "".join([  
+    f"<li><b>{row['Prioridade']}:</b> Média: {format_hours_to_hms(row['Média'])} | Máximo: {format_hours_to_hms(row['Máximo'])}</li>"
+    for _, row in tempos_medio_maximo.iterrows()
+])
+
+st.markdown(exibir_total_tempo(f"Tempo Total em {selecao_dados}", total_tempo, detalhes_tempo), unsafe_allow_html=True)
+
+# Definir cores personalizadas para cada prioridade
+prioridade_cores = {
+    'Baixa': '#90ACB8',
+    'Média': '#587D8E',
+    'Alta': '#C1D8E3',
+    'Muito Alta': '#2D55263'
+}
 
 # Gráficos de barras - Número de atendimentos por mês
-incidentes_por_mes = pd.DataFrame({
-    'Mês/Ano': ['Jan/2024', 'Fev/2024', 'Mar/2024'],
-    'Número de Atendimentos': [100, 150, 120]
-})
-
-requisicoes_por_mes = pd.DataFrame({
-    'Mês/Ano': ['Jan/2024', 'Fev/2024', 'Mar/2024'],
-    'Número de Atendimentos': [80, 130, 110]
-})
-
-# Gráficos de barras para número de atendimentos
-if not incidentes_por_mes.empty:
-    fig_incidentes = px.bar(
-        incidentes_por_mes,
+if not df_filtrado.empty:
+    fig = px.bar(
+        df_filtrado,
         x='Mês/Ano',
-        y='Número de Atendimentos',
-        text='Número de Atendimentos',
-        title="Número de Atendimentos por Mês - Incidentes",
-        color_discrete_sequence=['#1EA4B6']  # Cor para Incidentes
+        y='Horas Decimais',
+        title=f"Número de Atendimentos por Mês - {selecao_dados}",
+        text='Horas Decimais',
+        color='Prioridade',
+        color_discrete_map=prioridade_cores  # Cores personalizadas
     )
-    fig_incidentes.update_traces(texttemplate='<b>%{text}</b>', textposition='outside')
-    fig_incidentes.update_layout(
+    fig.update_traces(texttemplate='<b>%{text}</b>', textposition='outside')
+    fig.update_layout(
         xaxis_title=None,
-        yaxis_title=None,
-        showlegend=False,
+        yaxis_title="Horas",
+        showlegend=True,
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
         font=dict(color="black"),
     )
-    fig_incidentes.update_xaxes(showgrid=False)
-    fig_incidentes.update_yaxes(
+    fig.update_xaxes(showgrid=False)
+    fig.update_yaxes(
         showgrid=False,
         zeroline=False,
         showline=False,
         showticklabels=False
     )
-    st.plotly_chart(fig_incidentes)
-
-if not requisicoes_por_mes.empty:
-    fig_requisicoes = px.bar(
-        requisicoes_por_mes,
-        x='Mês/Ano',
-        y='Número de Atendimentos',
-        text='Número de Atendimentos',
-        title="Número de Atendimentos por Mês - Requisições",
-        color_discrete_sequence=['#00C6E0']  # Cor para Requisições
-    )
-    fig_requisicoes.update_traces(texttemplate='<b>%{text}</b>', textposition='outside')
-    fig_requisicoes.update_layout(
-        xaxis_title=None,
-        yaxis_title=None,
-        showlegend=False,
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(color="black"),
-    )
-    fig_requisicoes.update_xaxes(showgrid=False)
-    fig_requisicoes.update_yaxes(
-        showgrid=False,
-        zeroline=False,
-        showline=False,
-        showticklabels=False
-    )
-    st.plotly_chart(fig_requisicoes)
+    st.plotly_chart(fig)
 
 # Gráficos de pizza para distribuição por prioridade
-incidentes_por_prioridade = pd.DataFrame({
-    'Prioridade': ['Alta', 'Média', 'Baixa'],
-    'Número de Atendimentos': [50, 80, 70]
-})
+df_prioridade = df_filtrado.groupby('Prioridade').agg(
+    Total=('Horas Decimais', 'sum')
+).reset_index()
 
-requisicoes_por_prioridade = pd.DataFrame({
-    'Prioridade': ['Alta', 'Média', 'Baixa'],
-    'Número de Atendimentos': [30, 60, 40]
-})
-
-# Gráficos de pizza
-if not incidentes_por_prioridade.empty:
-    fig_incidentes_pizza = px.pie(
-        incidentes_por_prioridade,
-        names='Prioridade',
-        values='Número de Atendimentos',
-        title="Distribuição de Incidentes por Prioridade",
-        color='Prioridade',
-        color_discrete_map={'Alta': '#E60000', 'Média': '#FFD700', 'Baixa': '#228B22'}  # Cores customizadas
-    )
-    st.plotly_chart(fig_incidentes_pizza)
-
-if not requisicoes_por_prioridade.empty:
-    fig_requisicoes_pizza = px.pie(
-        requisicoes_por_prioridade,
-        names='Prioridade',
-        values='Número de Atendimentos',
-        title="Distribuição de Requisições por Prioridade",
-        color='Prioridade',
-        color_discrete_map={'Alta': '#E60000', 'Média': '#FFD700', 'Baixa': '#228B22'}  # Cores customizadas
-    )
-    st.plotly_chart(fig_requisicoes_pizza)
-
+# Gráfico de pizza
+fig_pizza = px.pie(
+    df_prioridade,
+    names='Prioridade',
+    values='Total',
+    title=f"Distribuição de {selecao_dados} por Prioridade",
+    color='Prioridade',
+    color_discrete_map=prioridade_cores  # Cores personalizadas
+)
+st.plotly_chart(fig_pizza)
