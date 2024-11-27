@@ -1,26 +1,29 @@
-import streamlit as st
-import pandas as pd
-import plotly.express as px
 import requests
 from io import BytesIO
+import pandas as pd
 
-# Parâmetros de autenticação
-token = "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"
-repo_url = "https://github.com/Luizfsbessa/Dash/blob/main/backtest.xlsx?raw=true"  # Link do arquivo no repositório privado
+# Token de autenticação do GitHub
+token = "seu_token_aqui"
 
-# Configurar headers para autenticação com o token
+# URL do arquivo no repositório privado
+repo_url = "https://github.com/usuario/repositorio/raw/main/arquivo.xlsx"
+
+# Cabeçalhos de autenticação
 headers = {
     'Authorization': f'token {token}'
 }
 
-# Fazer o download do arquivo Excel do repositório privado
+# Requisição GET para obter o arquivo
 response = requests.get(repo_url, headers=headers)
 
-# Verificar se a requisição foi bem-sucedida
 if response.status_code == 200:
-    # Carregar o arquivo Excel para um DataFrame
+    # Ler o arquivo Excel diretamente da resposta
     file_content = BytesIO(response.content)
     df = pd.read_excel(file_content)
+    print(df.head())  # Exemplo de como visualizar as primeiras linhas
+else:
+    print(f"Erro ao acessar o arquivo: {response.status_code}")
+
 
     # Certificar-se de que a coluna 'Data de abertura' está no formato datetime
     df['Data de abertura'] = pd.to_datetime(df['Data de abertura'], errors='coerce')
