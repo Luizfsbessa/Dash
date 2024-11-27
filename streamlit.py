@@ -219,3 +219,19 @@ else:
         )
         st.plotly_chart(fig_requisicoes)
 
+    # Gráfico de pizza de prioridades
+    if not df.empty:
+        prioridade_counts = df['Prioridade'].value_counts()
+        fig_pizza = px.pie(
+            names=prioridade_counts.index,
+            values=prioridade_counts.values,
+            title="Distribuição das Prioridades",
+            color=prioridade_counts.index,
+            color_discrete_map={
+                'Baixa': '#90ACB8',
+                'Média': '#587D8E',
+                'Alta': '#C1D8E3',
+                'Muito Alta': '#2D5526'
+            }
+        )
+        st.plotly_chart(fig_pizza)
