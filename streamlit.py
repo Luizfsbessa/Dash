@@ -10,47 +10,48 @@ repo_dir = "repositorio_dash"  # Pasta local onde o repositório será clonado
 
 # Verifica se o repositório já foi clonado; se não, faz o clone
 if not os.path.exists(repo_dir):
-    Repo.clone_from(repo_url, repo_dir)
-else:
     try:
-        # Se já existe, faz o pull para atualizar
-        repo = Repo(repo_dir)
-        repo.git.pull('origin', 'main')  # Atualiza o repositório local com as últimas mudanças
+        Repo.clone_from(repo_url, repo_dir)
+        st.success("Repositório clonado com sucesso.")
     except Exception as e:
-        st.error(f"Ocorreu um erro ao tentar atualizar o repositório: {e}")
+        st.error(f"Erro ao clonar o repositório: {e}")
 
 # Carregar o arquivo Excel do repositório clonado
 file_path = os.path.join(repo_dir, "backtest.xlsx")
-df = pd.read_excel(file_path)
 
-# Exibe o dataframe no Streamlit
-st.write(df)
+# Verifica se o arquivo existe antes de tentar carregá-lo
+if os.path.exists(file_path):
+    df = pd.read_excel(file_path)
 
-# Certificar-se de que a coluna 'Data de abertura' está no formato datetime
-df['Data de abertura'] = pd.to_datetime(df['Data de abertura'], errors='coerce')
+    # Exibe o dataframe no Streamlit
+    st.write(df)
 
-# Adicionar a coluna 'Mês/Ano' apenas com mês e ano
-df['Mês/Ano'] = df['Data de abertura'].dt.to_period('M').astype(str)
+    # Certificar-se de que a coluna 'Data de abertura' está no formato datetime
+    df['Data de abertura'] = pd.to_datetime(df['Data de abertura'], errors='coerce')
 
-# Determinar a data inicial padrão com base na base de dados
-min_date = df['Data de abertura'].min()
-if pd.notnull(min_date):
-    default_start_date = min_date.replace(day=1)
-else:
-    default_start_date = None
+    # Adicionar a coluna 'Mês/Ano' apenas com mês e ano
+    df['Mês/Ano'] = df['Data de abertura'].dt.to_period('M').astype(str)
 
-max_date = df['Data de abertura'].max()
+    # Determinar a data inicial padrão com base na base de dados
+    min_date = df['Data de abertura'].min()
+    if pd.notnull(min_date):
+        default_start_date = min_date.replace(day=1)
+    else:
+        default_start_date = None
 
-# Converter a coluna 'Tempo em atendimento' para horas decimais
-def time_to_hours(time_str):
-    try:
-        h, m, s = map(int, time_str.split(':'))
-        return h + m / 60 + s / 3600
-    except ValueError:
-        return 0
+    max_date = df['Data de abertura'].max()
 
-df['Horas Decimais'] = df['Tempo em atendimento'].apply(time_to_hours)
+    # Converter a coluna 'Tempo em atendimento' para horas decimais
+    def time_to_hours(time_str):
+        try:
+            h, m, s = map(int, time_str.split(':'))
+            return h + m / 60 + s / 3600
+        except ValueError:
+            return 0
 
+    df['Horas Decimais'] = df['Tempo em atendimento'].apply(time_to_hours)
+
+   
 
 # Título do app
 st.title("Dashboard de Atendimento")
