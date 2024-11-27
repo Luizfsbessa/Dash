@@ -1,42 +1,9 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import git
-import os
-import shutil
 
-# Verifique se o repositório já existe
-if os.path.exists(repo_dir):
-    shutil.rmtree(repo_dir)  # Deleta o repositório existente
-
-# Clona novamente o repositório
-try:
-    repo = git.Repo.clone_from(f"https://{token}@github.com/Luizfsbessa/Dash.git", repo_dir)
-    st.success("Repositório clonado com sucesso.")
-except git.exc.GitCommandError as e:
-    st.error(f"Erro ao clonar o repositório: {e}")
-    st.write(e.stderr)  # Exibe o erro detalhado
-
-
-# Definir o repositório e o token
-repo_url = "https://github.com/Luizfsbessa/Dash"
-token = "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"
-repo_dir = "/tmp/Dash"  # Diretório temporário para clonar o repositório
-
-# Clonar o repositório privado
-if not os.path.exists(repo_dir):
-    os.makedirs(repo_dir)
-
-    try:
-        # Clonando o repositório com o token para autenticação
-        git.cmd.Git().clone(f"https://{token}@github.com/Luizfsbessa/Dash.git", repo_dir)
-        st.success("Repositório clonado com sucesso.")
-    except Exception as e:
-        st.error(f"Erro ao clonar o repositório: {e}")
-        raise
-
-# Carregar os dados do arquivo Excel
-file_path = os.path.join(repo_dir, "backtest.xlsx")
+# Carregar dados
+file_path = "backtest.xlsx"
 df = pd.read_excel(file_path)
 
 # Certificar-se de que a coluna 'Data de abertura' está no formato datetime
@@ -175,6 +142,9 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+
+
+
 # Validar se as datas foram preenchidas corretamente
 if start_date and end_date and start_date > end_date:
     st.error("A data de início não pode ser maior que a data de fim.")
@@ -238,8 +208,6 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             """,
             unsafe_allow_html=True
         )
-
-   
 
       # Gráficos de número de atendimentos por mês, separados por Tipo (Requisição e Incidente)
     incidentes_por_mes = incidentes_df.groupby('Mês/Ano').size().reset_index(name='Número de Atendimentos')
