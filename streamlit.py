@@ -9,17 +9,29 @@ repo_url = "https://github.com/Luizfsbessa/Dash.git"
 token = "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"  # Coloque seu token aqui
 repo_dir = "repositorio_dash"  # Pasta local onde o repositório será clonado
 
-# Verificar se o repositório já existe, caso contrário, clonar
-if not os.path.exists(repo_dir):
-    repo_url_with_token = repo_url.replace("https://", f"https://{token}@")
-    Repo.clone_from(repo_url_with_token, repo_dir)
+# Verificar import os
+import pandas as pd
+import streamlit as st
+from git import Repo
 
-# Acessar o repositório clonado (não tentamos fazer 'git pull')
-repo = Repo(repo_dir)
+# URL do repositório com token de autenticação
+repo_url = "https://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@github.com/Luizfsbessa/Dash.git"
+repo_dir = "repositorio_dash"
+
+# Verifica se o repositório já foi clonado; se não, faz o clone
+if not os.path.exists(repo_dir):
+    Repo.clone_from(repo_url, repo_dir)
+else:
+    # Se já existe, faz o pull para atualizar
+    repo = Repo(repo_dir)
+    repo.git.pull('origin', 'main')
 
 # Carregar o arquivo Excel do repositório clonado
 file_path = os.path.join(repo_dir, "backtest.xlsx")
 df = pd.read_excel(file_path)
+
+# Exibe o dataframe no Streamlit
+st.write(df)
 
 # Certificar-se de que a coluna 'Data de abertura' está no formato datetime
 df['Data de abertura'] = pd.to_datetime(df['Data de abertura'], errors='coerce')
