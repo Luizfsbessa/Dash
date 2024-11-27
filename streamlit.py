@@ -163,3 +163,4 @@ if not requisicoes_por_prioridade.empty:
         color_discrete_map={'Alta': '#E60000', 'Média': '#FFD700', 'Baixa': '#228B22'}  # Cores customizadas
     )
     st.plotly_chart(fig_requisicoes_pizza)
+
