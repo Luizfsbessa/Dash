@@ -132,7 +132,7 @@ if 'Data de abertura' in df.columns and 'Horas Decimais' in df.columns:
 
             st.markdown(
                 f"""
-                <div style='background-color: #C1D8E3; padding: 15px; border-radius: 15px; margin-bottom: 15px;'>
+                <div style='background-color: #C1D8E3; padding: 30px; border-radius: 20px; margin-bottom: 30px;'>
                     <h2 style='text-align: center; color: #1E4C67;'>Tempo total em Incidentes:</h2>
                     <h1 style='text-align: center; color: #103D52; font-size: 1.1em; font-weight: bold;'>{format_hours_to_hms(incidentes_df['Horas Decimais'].sum())}</h1>
                     {incidentes_detalhes}
@@ -154,7 +154,7 @@ if 'Data de abertura' in df.columns and 'Horas Decimais' in df.columns:
 
             st.markdown(
                 f"""
-                <div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>
+                <div style='background-color: #C1D8E3; padding: 30px; border-radius: 20px; margin-bottom: 30px;'>
                     <h2 style='text-align: center; color: #1E4C67;'>Tempo total em Requisições:</h2>
                     <h1 style='text-align: center; color: #103D52; font-size: 1.1em; font-weight: bold;'>{format_hours_to_hms(requisicoes_df['Horas Decimais'].sum())}</h1>
                     {requisicoes_detalhes}
