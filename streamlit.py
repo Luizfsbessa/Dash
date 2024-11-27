@@ -1,9 +1,26 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from git import Repo
+import os
 
-# Carregar dados
-file_path = "backtest.xlsx"
+# Configurações do GitHub
+repo_url = "https://github.com/Luizfsbessa/Dash.git"
+token = "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"  # Coloque seu token aqui
+repo_dir = "repositorio_dash"  # Pasta local onde o repositório será clonado
+
+# Verificar se o repositório já existe, caso contrário, clonar
+if not os.path.exists(repo_dir):
+    # Criar a URL com o token de autenticação
+    repo_url_with_token = repo_url.replace("https://", f"https://{token}@")
+    Repo.clone_from(repo_url_with_token, repo_dir)
+
+# Acessar o repositório clonado
+repo = Repo(repo_dir)
+repo.git.pull('origin', 'main')  # Atualiza o repositório local com as últimas mudanças
+
+# Carregar o arquivo Excel do repositório clonado
+file_path = os.path.join(repo_dir, "backtest.xlsx")
 df = pd.read_excel(file_path)
 
 # Certificar-se de que a coluna 'Data de abertura' está no formato datetime
@@ -95,56 +112,6 @@ end_date = st.date_input(
     help="Escolha a data final para o filtrar os dados",
 )
 
-# Estilo para garantir que o texto fique visível no modo escuro
-st.markdown("""
-    <style>
-    .streamlit-expanderHeader {
-        color: white !important;
-    }
-    .stTextInput, .stDateInput, .stSelectbox, .stRadio {
-        color: white !important;
-        background-color: #333333 !important;  /* Fundo escuro */
-        border: 1px solid #5e5e5e !important;  /* Cor de borda clara */
-    }
-    .stTextInput input, .stDateInput input, .stSelectbox select {
-        color: white !important;
-        background-color: #333333 !important;  /* Fundo escuro no campo */
-    }
-    .stTextInput input::placeholder {
-        color: #aaaaaa !important;  /* Cor do texto do placeholder */
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-# Estilo para garantir visibilidade no modo claro e escuro
-st.markdown("""
-    <style>
-    /* Ajuste do texto e fundo dos componentes para modo claro e escuro */
-    .stSelectbox, .stDateInput, .stTextInput {
-        color: var(--secondary-text-color) !important;  /* Cor do texto ajustada automaticamente */
-        background-color: var(--background-color) !important;  /* Fundo adaptável ao tema */
-        border: 1px solid var(--border-color) !important;  /* Cor da borda ajustada */
-    }
-    .stSelectbox select, .stDateInput input, .stTextInput input {
-        color: var(--text-color) !important;
-        background-color: var(--background-color) !important;  /* Fundo adaptável */
-    }
-
-    /* Ajuste do placeholder */
-    .stTextInput input::placeholder, .stDateInput input::placeholder {
-        color: var(--secondary-text-color) !important;  /* Ajuste automático no placeholder */
-    }
-
-    /* Melhorando a visibilidade de seleções */
-    .stSelectbox select:focus, .stDateInput input:focus {
-        border-color: var(--primary-color) !important;  /* Cor da borda ao focar */
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-
-
-
 # Validar se as datas foram preenchidas corretamente
 if start_date and end_date and start_date > end_date:
     st.error("A data de início não pode ser maior que a data de fim.")
@@ -155,6 +122,9 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
         filtered_df = filtered_df[filtered_df['Data de abertura'] >= pd.to_datetime(start_date)]
     if end_date:
         filtered_df = filtered_df[filtered_df['Data de abertura'] <= pd.to_datetime(end_date)]
+
+
+
 
     # Calcular o total de horas por tipo
     incidentes_df = filtered_df[filtered_df['Tipo'] == 'Incidente']
