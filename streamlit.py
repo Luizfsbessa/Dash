@@ -6,7 +6,7 @@ import os
 
 # Configurações do GitHub
 repo_url = "https://github.com/Luizfsbessa/Dash.git"
-token = "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"  # Coloque seu token aqui
+token = "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"  # Coloque seu token aqui
 repo_dir = "repositorio_dash"  # Pasta local onde o repositório será clonado
 
 # Verificar se o repositório já existe, caso contrário, clonar
