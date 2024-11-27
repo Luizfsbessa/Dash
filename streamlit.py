@@ -270,19 +270,19 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
 
         st.plotly_chart(fig_requisicoes)
 
- # Gráficos de Pizza - Distribuição de Incidentes e Requisições por Prioridade
-incidentes_por_prioridade = incidentes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
-requisicoes_por_prioridade = requisicoes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
+    # Gráficos de Pizza - Distribuição de Incidentes e Requisições por Prioridade
+    incidentes_por_prioridade = incidentes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
+    requisicoes_por_prioridade = requisicoes_df.groupby('Prioridade').size().reset_index(name='Número de Atendimentos')
 
-# Definir cores personalizadas para cada prioridade
-prioridade_cores = {
-    'Baixa': '#90ACB8',
-    'Média': '#587D8E',
-    'Alta': '#C1D8E3',
-    'Muito Alta': '#2D55263'
-}
+    # Definir cores personalizadas para cada prioridade
+    prioridade_cores = {
+        'Baixa': '#90ACB8',
+        'Média': '#587D8E',
+        'Alta': '#C1D8E3',
+        'Muito Alta': '#2D55263'
+    }
 
-# Verificar se os DataFrames não estão vazios e exibir os gráficos de pizza
+    # Verificar se os DataFrames não estão vazios e exibir os gráficos de pizza
     if not incidentes_por_prioridade.empty:
         fig_incidentes_pizza = px.pie(
             incidentes_por_prioridade,
@@ -304,4 +304,3 @@ prioridade_cores = {
             color_discrete_map=prioridade_cores
         )
         st.plotly_chart(fig_requisicoes_pizza)
-
