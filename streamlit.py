@@ -123,15 +123,16 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             for _, row in tempos_incidentes.iterrows()
         ])
 
-        st.markdown(
-            f"""
-            <div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>
-                {incidentes_detalhes}
-                <p><b>Tempo total em Incidentes:</b> {format_hours_to_hms(incidentes_df['Horas Decimais'].sum())}</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        # Exibir tempos totais em incidentes com centralização e destaque
+    st.markdown(
+        f"""
+        <div style='background-color: #C1D8E3; padding: 20px; border-radius: 10px; margin-bottom: 20px;'>
+            <h2 style='text-align: center; color: #1E4C67;'>Tempo total em Incidentes:</h2>
+            <h1 style='text-align: center; color: #103D52; font-size: 2.5em; font-weight: bold;'>{format_hours_to_hms(incidentes_df['Horas Decimais'].sum())}</h1>
+        </div>
+        """,
+        unsafe_allow_html=True
+)
 
     if not requisicoes_df.empty:
         # Cálculo de tempos médios por prioridade em Requisições
@@ -145,15 +146,14 @@ elif tecnico:  # Só filtrar se o técnico foi selecionado
             for _, row in tempos_requisicoes.iterrows()
         ])
 
-        st.markdown(
-            f"""
-            <div style='background-color: #C1D8E3; padding: 15px; border-radius: 5px; margin-bottom: 10px;'>
-                {requisicoes_detalhes}
-                <p><b>Tempo total em Requisições:</b> {format_hours_to_hms(requisicoes_df['Horas Decimais'].sum())}</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+       st.markdown(
+        f"""
+        <div style='background-color: #C1D8E3; padding: 20px; border-radius: 10px; margin-bottom: 20px;'>
+            <h2 style='text-align: center; color: #1E4C67;'>Tempo total em Requisições:</h2>
+            <h1 style='text-align: center; color: #103D52; font-size: 2.5em; font-weight: bold;'>{format_hours_to_hms(incidentes_df['Horas Decimais'].sum())}</h1>
+        </div>
+        """,
+        unsafe_allow_html=True
 
 
     
