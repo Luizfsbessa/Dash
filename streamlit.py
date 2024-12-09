@@ -14,12 +14,12 @@ df['Mês/Ano'] = df['Data de abertura'].dt.to_period('M').astype(str)
 
 # Determinar a data inicial padrão com base na base de dados
 min_date = df['Data de abertura'].min()
+max_date = df['Data de abertura'].max()
+
 if pd.notnull(min_date):
     default_start_date = min_date.replace(day=1)
 else:
     default_start_date = None
-
-max_date = df['Data de abertura'].max()
 
 # Converter a coluna 'Tempo em atendimento' para horas decimais
 def time_to_hours(time_str):
@@ -40,6 +40,32 @@ df['Horas Decimais'] = df['Tempo em atendimento'].apply(time_to_hours)
 
 # Título do app
 st.title("Dashboard de Atendimento")
+
+# Garantir que as datas mínimas e máximas são válidas
+if pd.notnull(min_date) and pd.notnull(max_date):
+    # Filtro de intervalo de datas
+    start_date = st.date_input(
+        "Data de Início", 
+        value=default_start_date, 
+        min_value=min_date, 
+        max_value=max_date, 
+        format="DD/MM/YYYY",
+        key="start_date_input",  # Chave única
+        help="Escolha a data inicial para o filtrar os dados",
+    )
+
+    end_date = st.date_input(
+        "Data de Fim", 
+        value=max_date, 
+        min_value=min_date, 
+        max_value=max_date, 
+        format="DD/MM/YYYY",
+        key="end_date_input",  # Chave única
+        help="Escolha a data final para o filtrar os dados",
+    )
+else:
+    st.error("Os valores de data mínima e máxima não são válidos.")
+
 
 # Estilizando o fundo e a cor do texto das caixas de seleção e data
 custom_style = """
