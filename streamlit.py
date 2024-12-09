@@ -29,7 +29,7 @@ def time_to_hours(time_str):
     except ValueError:
         return 0
 
-# Formatar horas decimais no formato 6680:02:58
+# Formatar horas decimais no formato xxxx:xx:xx
 def format_hours_to_hms(decimal_hours):
     h = int(decimal_hours)
     m = int((decimal_hours - h) * 60)
