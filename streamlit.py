@@ -16,33 +16,14 @@ df['Mês/Ano'] = df['Data de abertura'].dt.to_period('M').astype(str)
 min_date = df['Data de abertura'].min()
 max_date = df['Data de abertura'].max()
 
-if pd.notnull(min_date):
-    default_start_date = min_date.replace(day=1)
-else:
-    default_start_date = None
-
-# Converter a coluna 'Tempo em atendimento' para horas decimais
-def time_to_hours(time_str):
-    try:
-        h, m, s = map(int, time_str.split(':'))
-        return h + m / 60 + s / 3600
-    except ValueError:
-        return 0
-
-# Formatar horas decimais no formato xxxx:xx:xx
-def format_hours_to_hms(decimal_hours):
-    h = int(decimal_hours)
-    m = int((decimal_hours - h) * 60)
-    s = int(((decimal_hours - h) * 60 - m) * 60)
-    return f"{h:02}:{m:02}:{s:02}"
-
-df['Horas Decimais'] = df['Tempo em atendimento'].apply(time_to_hours)
-
-# Título do app
-st.title("Dashboard de Atendimento")
-
-# Garantir que as datas mínimas e máximas são válidas
+# Garantir que as datas mínima e máxima sejam válidas
 if pd.notnull(min_date) and pd.notnull(max_date):
+    # Data inicial padrão será a menor data de abertura (com o primeiro dia do mês)
+    default_start_date = min_date.replace(day=1)
+
+    # Data final padrão será a maior data de abertura (sem alterações)
+    default_end_date = max_date
+
     # Filtro de intervalo de datas
     start_date = st.date_input(
         "Data de Início", 
@@ -51,17 +32,17 @@ if pd.notnull(min_date) and pd.notnull(max_date):
         max_value=max_date, 
         format="DD/MM/YYYY",
         key="start_date_input",  # Chave única
-        help="Escolha a data inicial para o filtrar os dados",
+        help="Escolha a data inicial para filtrar os dados",
     )
 
     end_date = st.date_input(
         "Data de Fim", 
-        value=max_date, 
+        value=default_end_date, 
         min_value=min_date, 
         max_value=max_date, 
         format="DD/MM/YYYY",
         key="end_date_input",  # Chave única
-        help="Escolha a data final para o filtrar os dados",
+        help="Escolha a data final para filtrar os dados",
     )
 else:
     st.error("Os valores de data mínima e máxima não são válidos.")
